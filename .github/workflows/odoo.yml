@@ -1,0 +1,59 @@
+name: odoo
+
+on:
+  pull_request:
+    paths:
+      - "odoo/**"
+      - ".github/workflows/odoo.yml"
+      - ".pre-commit-config.yaml"
+  push:
+    branches: [main]
+    paths:
+      - "odoo/**"
+      - ".github/workflows/odoo.yml"
+      - ".pre-commit-config.yaml"
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: pre-commit/action@v3.0.1
+
+  test:
+    # Mirrors the OCA addons-repo-template test job so the module drops into
+    # an OCA repo unchanged (only ADDONS_DIR differs for the monorepo layout).
+    runs-on: ubuntu-22.04
+    container: ghcr.io/oca/oca-ci/py3.10-odoo18.0:latest
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: odoo
+        ports:
+          - 5432:5432
+    env:
+      ADDONS_DIR: odoo/addons
+      OCA_ENABLE_CHECKLOG_ODOO: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install addons and dependencies
+        run: oca_install_addons
+      - name: Check licenses
+        run: manifestoo -d ${{ env.ADDONS_DIR }} check-licenses
+      - name: Check development status
+        run: manifestoo -d ${{ env.ADDONS_DIR }} check-dev-status --default-dev-status=Beta
+      - name: Initialize test db
+        run: oca_init_test_database
+      - name: Run tests
+        run: oca_run_tests
+      - uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

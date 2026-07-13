@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_scanner_remote_op_stock_user,scanner.remote.op stock user,model_scanner_remote_op,stock.group_stock_user,1,0,1,0

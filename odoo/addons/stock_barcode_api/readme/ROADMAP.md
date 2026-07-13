@@ -1,0 +1,3 @@
+- Lots/serials and package payloads for `set_quantity`.
+- Batched op application (one POST, many ops) for faster queue drains.
+- Cursor-based incremental working-set sync instead of full pulls.
