@@ -119,11 +119,7 @@ class OdooClient {
       model,
       'search_read',
       [domain],
-      {
-        'fields': fields,
-        'limit': ?limit,
-        'order': ?order,
-      },
+      {'fields': fields, 'limit': ?limit, 'order': ?order},
     );
     return (result as List).cast<Map<String, dynamic>>();
   }
