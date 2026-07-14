@@ -1,6 +1,8 @@
 import 'package:drift/drift.dart';
 
+import '../odoo/crm_models.dart';
 import '../odoo/models.dart';
+import '../odoo/sales_models.dart';
 
 part 'database.g.dart';
 
@@ -39,6 +41,54 @@ class Products extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// CRM mirror: my open opportunities and the pipeline stages.
+class Leads extends Table {
+  IntColumn get id => integer()();
+  TextColumn get name => text()();
+  TextColumn get partnerName => text().withDefault(const Constant(''))();
+  IntColumn get stageId => integer().nullable()();
+  TextColumn get stageName => text().withDefault(const Constant(''))();
+  RealColumn get expectedRevenue => real().withDefault(const Constant(0))();
+  TextColumn get phone => text().withDefault(const Constant(''))();
+  TextColumn get email => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class CrmStages extends Table {
+  IntColumn get id => integer()();
+  TextColumn get name => text()();
+  IntColumn get sequence => integer().withDefault(const Constant(0))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Sales mirror: my open quotations and their lines.
+class SaleOrders extends Table {
+  IntColumn get id => integer()();
+  TextColumn get name => text()();
+  TextColumn get state => text()();
+  TextColumn get partnerName => text().withDefault(const Constant(''))();
+  RealColumn get amountTotal => real().withDefault(const Constant(0))();
+  DateTimeColumn get dateOrder => dateTime().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+class SaleOrderLines extends Table {
+  IntColumn get id => integer()();
+  IntColumn get orderId => integer()();
+  TextColumn get description => text().withDefault(const Constant(''))();
+  RealColumn get quantity => real().withDefault(const Constant(0))();
+  RealColumn get priceSubtotal => real().withDefault(const Constant(0))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 enum OpStatus { pending, done, conflict }
 
 /// Outbound operation queue. The UI never writes to Odoo directly: every
@@ -56,12 +106,35 @@ class OpQueue extends Table {
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
 }
 
-@DriftDatabase(tables: [Pickings, MoveLines, Products, OpQueue])
+@DriftDatabase(
+  tables: [
+    Pickings,
+    MoveLines,
+    Products,
+    OpQueue,
+    Leads,
+    CrmStages,
+    SaleOrders,
+    SaleOrderLines,
+  ],
+)
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(leads);
+        await m.createTable(crmStages);
+        await m.createTable(saleOrders);
+        await m.createTable(saleOrderLines);
+      }
+    },
+  );
 
   // ---- Mirror reads ----
 
@@ -87,6 +160,30 @@ class AppDatabase extends _$AppDatabase {
             )
             ..limit(1))
           .getSingleOrNull();
+
+  Stream<List<Lead>> watchLeads() =>
+      (select(leads)..orderBy([
+            (t) => OrderingTerm.asc(t.stageId),
+            (t) => OrderingTerm.desc(t.expectedRevenue),
+          ]))
+          .watch();
+
+  Future<Lead?> leadById(int id) =>
+      (select(leads)..where((t) => t.id.equals(id))).getSingleOrNull();
+
+  Stream<List<CrmStage>> watchCrmStages() => (select(
+    crmStages,
+  )..orderBy([(t) => OrderingTerm.asc(t.sequence)])).watch();
+
+  Stream<List<SaleOrder>> watchSaleOrders() => (select(
+    saleOrders,
+  )..orderBy([(t) => OrderingTerm.desc(t.dateOrder)])).watch();
+
+  Future<SaleOrder?> saleOrderById(int id) =>
+      (select(saleOrders)..where((t) => t.id.equals(id))).getSingleOrNull();
+
+  Stream<List<SaleOrderLine>> watchSaleOrderLines(int orderId) =>
+      (select(saleOrderLines)..where((t) => t.orderId.equals(orderId))).watch();
 
   // ---- Mirror writes (sync pull + optimistic updates) ----
 
@@ -136,6 +233,113 @@ class AppDatabase extends _$AppDatabase {
       );
     });
   }
+
+  Future<void> replaceCrmWorkingSet({
+    required List<RemoteLead> remoteLeads,
+    required List<RemoteCrmStage> remoteStages,
+  }) async {
+    await batch((b) {
+      b.deleteAll(leads);
+      b.deleteAll(crmStages);
+      b.insertAll(
+        leads,
+        remoteLeads.map(
+          (l) => LeadsCompanion.insert(
+            id: Value(l.id),
+            name: l.name,
+            partnerName: Value(l.partnerName),
+            stageId: Value(l.stageId),
+            stageName: Value(l.stageName),
+            expectedRevenue: Value(l.expectedRevenue),
+            phone: Value(l.phone),
+            email: Value(l.email),
+          ),
+        ),
+      );
+      b.insertAll(
+        crmStages,
+        remoteStages.map(
+          (s) => CrmStagesCompanion.insert(
+            id: Value(s.id),
+            name: s.name,
+            sequence: Value(s.sequence),
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<void> replaceSalesWorkingSet({
+    required List<RemoteSaleOrder> remoteOrders,
+    required List<RemoteSaleOrderLine> remoteLines,
+  }) async {
+    await batch((b) {
+      b.deleteAll(saleOrders);
+      b.deleteAll(saleOrderLines);
+      b.insertAll(
+        saleOrders,
+        remoteOrders.map(
+          (o) => SaleOrdersCompanion.insert(
+            id: Value(o.id),
+            name: o.name,
+            state: o.state,
+            partnerName: Value(o.partnerName),
+            amountTotal: Value(o.amountTotal),
+            dateOrder: Value(o.dateOrder),
+          ),
+        ),
+      );
+      b.insertAll(
+        saleOrderLines,
+        remoteLines.map(
+          (l) => SaleOrderLinesCompanion.insert(
+            id: Value(l.id),
+            orderId: l.orderId,
+            description: Value(l.description),
+            quantity: Value(l.quantity),
+            priceSubtotal: Value(l.priceSubtotal),
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<void> setLocalLeadStage(int leadId, int stageId, String stageName) =>
+      (update(leads)..where((t) => t.id.equals(leadId))).write(
+        LeadsCompanion(stageId: Value(stageId), stageName: Value(stageName)),
+      );
+
+  Future<int> insertLocalLead({
+    required String name,
+    required String partnerName,
+    required String phone,
+    required String email,
+    int? stageId,
+    String stageName = '',
+  }) async {
+    // Same negative-id convention as move lines: local-only until next pull.
+    final minId = await (selectOnly(leads)..addColumns([leads.id.min()]))
+        .map((row) => row.read(leads.id.min()))
+        .getSingle();
+    final localId = (minId != null && minId < 0 ? minId : 0) - 1;
+    await into(leads).insert(
+      LeadsCompanion.insert(
+        id: Value(localId),
+        name: name,
+        partnerName: Value(partnerName),
+        stageId: Value(stageId),
+        stageName: Value(stageName),
+        phone: Value(phone),
+        email: Value(email),
+      ),
+    );
+    return localId;
+  }
+
+  Future<void> setLocalSaleOrderState(int orderId, String state) =>
+      (update(saleOrders)..where((t) => t.id.equals(orderId))).write(
+        SaleOrdersCompanion(state: Value(state)),
+      );
 
   Future<void> setLocalMoveLineQuantity(int moveLineId, double quantity) =>
       (update(moveLines)..where((t) => t.id.equals(moveLineId))).write(

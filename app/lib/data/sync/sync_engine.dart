@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 
 import '../local/database.dart';
+import '../odoo/crm_api.dart';
 import '../odoo/odoo_client.dart';
+import '../odoo/sales_api.dart';
 import '../odoo/scanner_api.dart';
 import 'op.dart';
 
@@ -22,23 +24,28 @@ class SyncOffline extends SyncResult {
   const SyncOffline();
 }
 
-/// Drains the outbound op queue in order, then refreshes the local mirror.
+/// Drains the outbound op queue in order, then refreshes the local mirrors
+/// of every enabled module (warehouse, CRM, sales).
 ///
 /// Failure policy (§6 of the plan):
 /// - transport errors (no network, timeouts) stop the drain — ops stay
 ///   `pending` and are retried on the next connectivity event;
 /// - server rejections mark the op `conflict` and keep draining — the
-///   subsequent pull reloads the affected records so the operator re-scans
+///   subsequent pull reloads the affected records so the operator re-checks
 ///   against fresh state instead of the app blindly overwriting.
 class SyncEngine {
   SyncEngine({
     required this.db,
-    required this.api,
+    required this.warehouseApi,
+    required this.crmApi,
+    required this.salesApi,
     this.pickingTypeCode = 'incoming',
   });
 
   final AppDatabase db;
-  final ScannerApi api;
+  final ScannerApi warehouseApi;
+  final CrmApi crmApi;
+  final SalesApi salesApi;
   final String pickingTypeCode;
 
   bool _running = false;
@@ -49,7 +56,15 @@ class SyncEngine {
     try {
       final drainResult = await _drainQueue();
       if (drainResult is SyncOffline) return drainResult;
-      await _pullWorkingSet();
+      // A module the server doesn't have installed (e.g. no CRM) fails its
+      // own pull with an RPC error; the other mirrors still refresh.
+      for (final pull in [_pullWarehouse, _pullCrm, _pullSales]) {
+        try {
+          await pull();
+        } on OdooRpcException {
+          continue;
+        }
+      }
       return drainResult;
     } on DioException {
       return const SyncOffline();
@@ -83,33 +98,68 @@ class SyncEngine {
 
   Future<void> _apply(ScanOp op) => switch (op) {
     SetQuantityOp(:final moveLineId, :final quantity) =>
-      api.setMoveLineQuantity(moveLineId: moveLineId, quantity: quantity),
+      warehouseApi.setMoveLineQuantity(
+        moveLineId: moveLineId,
+        quantity: quantity,
+      ),
     AddProductLineOp(:final pickingId, :final productId, :final quantity) =>
-      api.createMoveLine(
+      warehouseApi.createMoveLine(
         pickingId: pickingId,
         productId: productId,
         quantity: quantity,
       ),
     ValidatePickingOp(:final pickingId, :final createBackorder) =>
-      api.validatePicking(
+      warehouseApi.validatePicking(
         pickingId: pickingId,
         createBackorder: createBackorder,
       ),
+    SetLeadStageOp(:final leadId, :final stageId) => crmApi.setLeadStage(
+      leadId: leadId,
+      stageId: stageId,
+    ),
+    LogLeadNoteOp(:final leadId, :final body) => crmApi.logNote(
+      leadId: leadId,
+      body: body,
+    ),
+    CreateLeadOp(:final name, :final contactName, :final phone, :final email) =>
+      crmApi.createLead(
+        name: name,
+        contactName: contactName,
+        phone: phone,
+        email: email,
+      ),
+    ConfirmSaleOrderOp(:final orderId) => salesApi.confirmOrder(
+      orderId: orderId,
+    ),
   };
 
-  Future<void> _pullWorkingSet() async {
-    final pickings = await api.fetchOpenPickings(
+  Future<void> _pullWarehouse() async {
+    final pickings = await warehouseApi.fetchOpenPickings(
       pickingTypeCode: pickingTypeCode,
     );
-    final moveLines = await api.fetchMoveLines(
+    final moveLines = await warehouseApi.fetchMoveLines(
       pickings.map((p) => p.id).toList(),
     );
     final productIds = moveLines.map((l) => l.productId).toSet().toList();
-    final products = await api.fetchProducts(productIds);
+    final products = await warehouseApi.fetchProducts(productIds);
     await db.replaceWorkingSet(
       remotePickings: pickings,
       remoteMoveLines: moveLines,
       remoteProducts: products,
     );
+  }
+
+  Future<void> _pullCrm() async {
+    final leads = await crmApi.fetchMyOpenLeads();
+    final stages = await crmApi.fetchStages();
+    await db.replaceCrmWorkingSet(remoteLeads: leads, remoteStages: stages);
+  }
+
+  Future<void> _pullSales() async {
+    final orders = await salesApi.fetchMyQuotations();
+    final lines = await salesApi.fetchOrderLines(
+      orders.map((o) => o.id).toList(),
+    );
+    await db.replaceSalesWorkingSet(remoteOrders: orders, remoteLines: lines);
   }
 }

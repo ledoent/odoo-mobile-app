@@ -43,7 +43,7 @@ class OnboardingScreen extends HookConsumerWidget {
         await ref.read(sessionRepositoryProvider).save(session);
         ref.invalidate(sessionProvider);
         if (context.mounted) {
-          AutoRouter.of(context).replaceAll([const PickingsRoute()]);
+          AutoRouter.of(context).replaceAll([const HomeRoute()]);
         }
       } on OdooAuthException catch (e) {
         error.value = e.message;

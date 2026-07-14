@@ -1,19 +1,29 @@
-# Odoo Warehouse Scanner
+# Odoo Mobile
 
 [![flutter](https://github.com/ledoent/odoo-mobile-app/actions/workflows/flutter.yml/badge.svg)](https://github.com/ledoent/odoo-mobile-app/actions/workflows/flutter.yml)
 [![odoo](https://github.com/ledoent/odoo-mobile-app/actions/workflows/odoo.yml/badge.svg)](https://github.com/ledoent/odoo-mobile-app/actions/workflows/odoo.yml)
 
-An open-source, **Android-first** warehouse/inventory scanning app for Odoo —
-a FOSS alternative to Ventor Pro — plus a thin, OCA-candidate REST module
-that gives it a stable, versioned server contract.
+An open-source, **Android-first, offline-first** mobile app for Odoo,
+organized by role:
 
-See [PLAN.md](PLAN.md) for the full architecture and roadmap.
+- **Warehouse** — barcode receiving (camera, Zebra DataWedge, keyboard
+  wedge); a FOSS alternative to Ventor Pro
+- **CRM** — my pipeline: leads by stage, stage moves, notes, quick-add
+- **Sales** — my quotations: review lines, confirm orders
+
+Every module runs on the same offline core: a local Drift mirror plus an
+idempotent op queue, so all roles work with no signal and sync when it
+returns. A thin, OCA-candidate REST module gives the warehouse flows a
+stable, versioned server contract.
+
+See [PLAN.md](PLAN.md) for the full architecture and roadmap (§11 covers the
+multi-role layout).
 
 ## Monorepo layout
 
 | Path | What | License |
 | ---- | ---- | ------- |
-| [`app/`](app/) | Flutter app (`odoo_scanner`) — Riverpod, Drift offline mirror + op queue, `mobile_scanner`, Zebra DataWedge | [MIT](app/LICENSE) |
+| [`app/`](app/) | Flutter app (`odoo_scanner`) — Riverpod, Drift offline mirrors + op queue, role modules (warehouse / CRM / sales), `mobile_scanner`, Zebra DataWedge | [MIT](app/LICENSE) |
 | [`odoo/addons/stock_barcode_api/`](odoo/addons/stock_barcode_api/) | Odoo 18 addon: `/scanner/v1/` REST endpoints, Bearer API-key auth, idempotent ops | [AGPL-3](odoo/LICENSE) |
 
 The two halves are deliberately decoupled: the app speaks raw JSON-RPC out of
