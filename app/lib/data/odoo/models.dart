@@ -4,6 +4,8 @@
 /// `quantity` + `picked` (the old `qty_done` is gone).
 library;
 
+import 'odoo_json.dart';
+
 class RemotePicking {
   const RemotePicking({
     required this.id,
@@ -22,17 +24,13 @@ class RemotePicking {
   final DateTime? scheduledDate;
 
   factory RemotePicking.fromJson(Map<String, dynamic> json) {
-    final partner = json['partner_id'];
-    final typeCode = json['picking_type_code'];
     final scheduled = json['scheduled_date'];
     return RemotePicking(
       id: json['id'] as int,
       name: json['name'] as String,
       state: json['state'] as String,
-      pickingTypeCode: typeCode is String ? typeCode : '',
-      partnerName: partner is List && partner.length > 1
-          ? partner[1] as String
-          : '',
+      pickingTypeCode: odooString(json['picking_type_code']),
+      partnerName: relName(json['partner_id']),
       scheduledDate: scheduled is String ? DateTime.tryParse(scheduled) : null,
     );
   }
@@ -55,20 +53,14 @@ class RemoteMoveLine {
   final double quantity;
   final bool picked;
 
-  factory RemoteMoveLine.fromJson(Map<String, dynamic> json) {
-    final picking = json['picking_id'];
-    final product = json['product_id'];
-    return RemoteMoveLine(
-      id: json['id'] as int,
-      pickingId: picking is List ? picking[0] as int : picking as int,
-      productId: product is List ? product[0] as int : product as int,
-      productName: product is List && product.length > 1
-          ? product[1] as String
-          : '',
-      quantity: (json['quantity'] as num? ?? 0).toDouble(),
-      picked: json['picked'] as bool? ?? false,
-    );
-  }
+  factory RemoteMoveLine.fromJson(Map<String, dynamic> json) => RemoteMoveLine(
+    id: json['id'] as int,
+    pickingId: relId(json['picking_id'])!,
+    productId: relId(json['product_id'])!,
+    productName: relName(json['product_id']),
+    quantity: (json['quantity'] as num? ?? 0).toDouble(),
+    picked: json['picked'] as bool? ?? false,
+  );
 }
 
 class RemoteProduct {

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/sync_feedback.dart';
 import '../../core/router.dart';
 import '../../data/local/database.dart';
-import '../../data/sync/sync_engine.dart';
 
 final _pickingsProvider = StreamProvider<List<Picking>>(
   (ref) => ref.watch(databaseProvider).watchPickings(),
@@ -26,11 +26,7 @@ class PickingsScreen extends ConsumerWidget {
       final engine = ref.read(syncEngineProvider);
       if (engine == null) return;
       final result = await engine.sync();
-      if (result is SyncOffline && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Offline — showing local data')),
-        );
-      }
+      if (context.mounted) showSyncResultSnackBar(context, result);
     }
 
     return Scaffold(

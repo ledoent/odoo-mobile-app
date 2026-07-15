@@ -202,3 +202,27 @@ Backend (separate):
 *Verdict recap: Flutter, Android-first, thin app over a REST façade; propose the façade
 to OCA, keep the app independent. Start with raw JSON-RPC to reach a working scan demo
 in days, then invest in the offline sync engine — that's the part that makes or breaks it.*
+
+---
+
+## 11. Direction change (2026-07-14) — multi-role app
+
+Decision: this is a **general-purpose, role-based Odoo mobile app**, not only a
+scanner. §1–§10 remain the plan for the Warehouse module (the deepest one);
+the app itself is now organized as modules on one shared offline core:
+
+- **Core (shared):** onboarding/API-key auth, JSON-RPC client, Drift mirrors,
+  the op queue + sync engine (client-UUID idempotency, conflict surfacing),
+  connectivity trigger. Adding a module = new mirror tables + typed ops +
+  a feature folder; the engine and queue are untouched.
+- **Warehouse:** receipts scan flow (as before). `stock_barcode_api` stays the
+  OCA-candidate server contract for it.
+- **CRM:** my pipeline (open opportunities by stage), move stage, log note,
+  quick-add lead — all offline-queued.
+- **Sales:** my quotations, order lines, confirm order — offline-queued.
+- Modules a server lacks (e.g. no CRM installed) skip their pull without
+  breaking the others, so one APK serves all roles.
+
+Rationale: Odoo's official app covers online sales/CRM adequately; the value
+here is one FOSS app per company where every role gets offline-first and the
+warehouse gets hardware scanning.

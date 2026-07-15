@@ -3,10 +3,14 @@ import 'package:drift_flutter/drift_flutter.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../data/local/database.dart';
+import '../data/odoo/crm_api.dart';
 import '../data/odoo/odoo_client.dart';
+import '../data/odoo/sales_api.dart';
 import '../data/odoo/scanner_api.dart';
 import '../data/sync/sync_engine.dart';
+import '../features/crm/crm_service.dart';
 import '../features/onboarding/session_repository.dart';
+import '../features/sales/sales_service.dart';
 import '../features/scan/scan_service.dart';
 
 final sessionRepositoryProvider = Provider<SessionRepository>(
@@ -40,18 +44,47 @@ final scannerApiProvider = Provider<ScannerApi?>((ref) {
   return client == null ? null : JsonRpcScannerApi(client);
 });
 
+final crmApiProvider = Provider<CrmApi?>((ref) {
+  final client = ref.watch(odooClientProvider);
+  return client == null ? null : JsonRpcCrmApi(client);
+});
+
+final salesApiProvider = Provider<SalesApi?>((ref) {
+  final client = ref.watch(odooClientProvider);
+  return client == null ? null : JsonRpcSalesApi(client);
+});
+
 final syncEngineProvider = Provider<SyncEngine?>((ref) {
-  final api = ref.watch(scannerApiProvider);
-  if (api == null) return null;
-  return SyncEngine(db: ref.watch(databaseProvider), api: api);
+  final warehouseApi = ref.watch(scannerApiProvider);
+  final crmApi = ref.watch(crmApiProvider);
+  final salesApi = ref.watch(salesApiProvider);
+  if (warehouseApi == null || crmApi == null || salesApi == null) return null;
+  return SyncEngine(
+    db: ref.watch(databaseProvider),
+    warehouseApi: warehouseApi,
+    crmApi: crmApi,
+    salesApi: salesApi,
+  );
 });
 
 final scanServiceProvider = Provider<ScanService>(
   (ref) => ScanService(ref.watch(databaseProvider)),
 );
 
+final crmServiceProvider = Provider<CrmService>(
+  (ref) => CrmService(ref.watch(databaseProvider)),
+);
+
+final salesServiceProvider = Provider<SalesService>(
+  (ref) => SalesService(ref.watch(databaseProvider)),
+);
+
 final pendingOpCountProvider = StreamProvider<int>(
   (ref) => ref.watch(databaseProvider).watchPendingOpCount(),
+);
+
+final conflictOpsProvider = StreamProvider<List<OpQueueData>>(
+  (ref) => ref.watch(databaseProvider).watchConflictOps(),
 );
 
 /// Kicks a sync whenever connectivity comes back (§6: connectivity drives

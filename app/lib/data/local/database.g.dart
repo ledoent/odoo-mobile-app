@@ -1551,6 +1551,1492 @@ class OpQueueCompanion extends UpdateCompanion<OpQueueData> {
   }
 }
 
+class $LeadsTable extends Leads with TableInfo<$LeadsTable, Lead> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LeadsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _partnerNameMeta = const VerificationMeta(
+    'partnerName',
+  );
+  @override
+  late final GeneratedColumn<String> partnerName = GeneratedColumn<String>(
+    'partner_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _stageIdMeta = const VerificationMeta(
+    'stageId',
+  );
+  @override
+  late final GeneratedColumn<int> stageId = GeneratedColumn<int>(
+    'stage_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stageNameMeta = const VerificationMeta(
+    'stageName',
+  );
+  @override
+  late final GeneratedColumn<String> stageName = GeneratedColumn<String>(
+    'stage_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _expectedRevenueMeta = const VerificationMeta(
+    'expectedRevenue',
+  );
+  @override
+  late final GeneratedColumn<double> expectedRevenue = GeneratedColumn<double>(
+    'expected_revenue',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  @override
+  late final GeneratedColumn<String> phone = GeneratedColumn<String>(
+    'phone',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _emailMeta = const VerificationMeta('email');
+  @override
+  late final GeneratedColumn<String> email = GeneratedColumn<String>(
+    'email',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    partnerName,
+    stageId,
+    stageName,
+    expectedRevenue,
+    phone,
+    email,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'leads';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Lead> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('partner_name')) {
+      context.handle(
+        _partnerNameMeta,
+        partnerName.isAcceptableOrUnknown(
+          data['partner_name']!,
+          _partnerNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('stage_id')) {
+      context.handle(
+        _stageIdMeta,
+        stageId.isAcceptableOrUnknown(data['stage_id']!, _stageIdMeta),
+      );
+    }
+    if (data.containsKey('stage_name')) {
+      context.handle(
+        _stageNameMeta,
+        stageName.isAcceptableOrUnknown(data['stage_name']!, _stageNameMeta),
+      );
+    }
+    if (data.containsKey('expected_revenue')) {
+      context.handle(
+        _expectedRevenueMeta,
+        expectedRevenue.isAcceptableOrUnknown(
+          data['expected_revenue']!,
+          _expectedRevenueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+        _phoneMeta,
+        phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta),
+      );
+    }
+    if (data.containsKey('email')) {
+      context.handle(
+        _emailMeta,
+        email.isAcceptableOrUnknown(data['email']!, _emailMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Lead map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Lead(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      partnerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}partner_name'],
+      )!,
+      stageId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}stage_id'],
+      ),
+      stageName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stage_name'],
+      )!,
+      expectedRevenue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}expected_revenue'],
+      )!,
+      phone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}phone'],
+      )!,
+      email: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}email'],
+      )!,
+    );
+  }
+
+  @override
+  $LeadsTable createAlias(String alias) {
+    return $LeadsTable(attachedDatabase, alias);
+  }
+}
+
+class Lead extends DataClass implements Insertable<Lead> {
+  final int id;
+  final String name;
+  final String partnerName;
+  final int? stageId;
+  final String stageName;
+  final double expectedRevenue;
+  final String phone;
+  final String email;
+  const Lead({
+    required this.id,
+    required this.name,
+    required this.partnerName,
+    this.stageId,
+    required this.stageName,
+    required this.expectedRevenue,
+    required this.phone,
+    required this.email,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['partner_name'] = Variable<String>(partnerName);
+    if (!nullToAbsent || stageId != null) {
+      map['stage_id'] = Variable<int>(stageId);
+    }
+    map['stage_name'] = Variable<String>(stageName);
+    map['expected_revenue'] = Variable<double>(expectedRevenue);
+    map['phone'] = Variable<String>(phone);
+    map['email'] = Variable<String>(email);
+    return map;
+  }
+
+  LeadsCompanion toCompanion(bool nullToAbsent) {
+    return LeadsCompanion(
+      id: Value(id),
+      name: Value(name),
+      partnerName: Value(partnerName),
+      stageId: stageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stageId),
+      stageName: Value(stageName),
+      expectedRevenue: Value(expectedRevenue),
+      phone: Value(phone),
+      email: Value(email),
+    );
+  }
+
+  factory Lead.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Lead(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      partnerName: serializer.fromJson<String>(json['partnerName']),
+      stageId: serializer.fromJson<int?>(json['stageId']),
+      stageName: serializer.fromJson<String>(json['stageName']),
+      expectedRevenue: serializer.fromJson<double>(json['expectedRevenue']),
+      phone: serializer.fromJson<String>(json['phone']),
+      email: serializer.fromJson<String>(json['email']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'partnerName': serializer.toJson<String>(partnerName),
+      'stageId': serializer.toJson<int?>(stageId),
+      'stageName': serializer.toJson<String>(stageName),
+      'expectedRevenue': serializer.toJson<double>(expectedRevenue),
+      'phone': serializer.toJson<String>(phone),
+      'email': serializer.toJson<String>(email),
+    };
+  }
+
+  Lead copyWith({
+    int? id,
+    String? name,
+    String? partnerName,
+    Value<int?> stageId = const Value.absent(),
+    String? stageName,
+    double? expectedRevenue,
+    String? phone,
+    String? email,
+  }) => Lead(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    partnerName: partnerName ?? this.partnerName,
+    stageId: stageId.present ? stageId.value : this.stageId,
+    stageName: stageName ?? this.stageName,
+    expectedRevenue: expectedRevenue ?? this.expectedRevenue,
+    phone: phone ?? this.phone,
+    email: email ?? this.email,
+  );
+  Lead copyWithCompanion(LeadsCompanion data) {
+    return Lead(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      partnerName: data.partnerName.present
+          ? data.partnerName.value
+          : this.partnerName,
+      stageId: data.stageId.present ? data.stageId.value : this.stageId,
+      stageName: data.stageName.present ? data.stageName.value : this.stageName,
+      expectedRevenue: data.expectedRevenue.present
+          ? data.expectedRevenue.value
+          : this.expectedRevenue,
+      phone: data.phone.present ? data.phone.value : this.phone,
+      email: data.email.present ? data.email.value : this.email,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Lead(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('partnerName: $partnerName, ')
+          ..write('stageId: $stageId, ')
+          ..write('stageName: $stageName, ')
+          ..write('expectedRevenue: $expectedRevenue, ')
+          ..write('phone: $phone, ')
+          ..write('email: $email')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    partnerName,
+    stageId,
+    stageName,
+    expectedRevenue,
+    phone,
+    email,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Lead &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.partnerName == this.partnerName &&
+          other.stageId == this.stageId &&
+          other.stageName == this.stageName &&
+          other.expectedRevenue == this.expectedRevenue &&
+          other.phone == this.phone &&
+          other.email == this.email);
+}
+
+class LeadsCompanion extends UpdateCompanion<Lead> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> partnerName;
+  final Value<int?> stageId;
+  final Value<String> stageName;
+  final Value<double> expectedRevenue;
+  final Value<String> phone;
+  final Value<String> email;
+  const LeadsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.partnerName = const Value.absent(),
+    this.stageId = const Value.absent(),
+    this.stageName = const Value.absent(),
+    this.expectedRevenue = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.email = const Value.absent(),
+  });
+  LeadsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.partnerName = const Value.absent(),
+    this.stageId = const Value.absent(),
+    this.stageName = const Value.absent(),
+    this.expectedRevenue = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.email = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<Lead> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? partnerName,
+    Expression<int>? stageId,
+    Expression<String>? stageName,
+    Expression<double>? expectedRevenue,
+    Expression<String>? phone,
+    Expression<String>? email,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (partnerName != null) 'partner_name': partnerName,
+      if (stageId != null) 'stage_id': stageId,
+      if (stageName != null) 'stage_name': stageName,
+      if (expectedRevenue != null) 'expected_revenue': expectedRevenue,
+      if (phone != null) 'phone': phone,
+      if (email != null) 'email': email,
+    });
+  }
+
+  LeadsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? partnerName,
+    Value<int?>? stageId,
+    Value<String>? stageName,
+    Value<double>? expectedRevenue,
+    Value<String>? phone,
+    Value<String>? email,
+  }) {
+    return LeadsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      partnerName: partnerName ?? this.partnerName,
+      stageId: stageId ?? this.stageId,
+      stageName: stageName ?? this.stageName,
+      expectedRevenue: expectedRevenue ?? this.expectedRevenue,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (partnerName.present) {
+      map['partner_name'] = Variable<String>(partnerName.value);
+    }
+    if (stageId.present) {
+      map['stage_id'] = Variable<int>(stageId.value);
+    }
+    if (stageName.present) {
+      map['stage_name'] = Variable<String>(stageName.value);
+    }
+    if (expectedRevenue.present) {
+      map['expected_revenue'] = Variable<double>(expectedRevenue.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String>(phone.value);
+    }
+    if (email.present) {
+      map['email'] = Variable<String>(email.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LeadsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('partnerName: $partnerName, ')
+          ..write('stageId: $stageId, ')
+          ..write('stageName: $stageName, ')
+          ..write('expectedRevenue: $expectedRevenue, ')
+          ..write('phone: $phone, ')
+          ..write('email: $email')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CrmStagesTable extends CrmStages
+    with TableInfo<$CrmStagesTable, CrmStage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CrmStagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sequenceMeta = const VerificationMeta(
+    'sequence',
+  );
+  @override
+  late final GeneratedColumn<int> sequence = GeneratedColumn<int>(
+    'sequence',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, sequence];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'crm_stages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CrmStage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('sequence')) {
+      context.handle(
+        _sequenceMeta,
+        sequence.isAcceptableOrUnknown(data['sequence']!, _sequenceMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CrmStage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CrmStage(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      sequence: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sequence'],
+      )!,
+    );
+  }
+
+  @override
+  $CrmStagesTable createAlias(String alias) {
+    return $CrmStagesTable(attachedDatabase, alias);
+  }
+}
+
+class CrmStage extends DataClass implements Insertable<CrmStage> {
+  final int id;
+  final String name;
+  final int sequence;
+  const CrmStage({
+    required this.id,
+    required this.name,
+    required this.sequence,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['sequence'] = Variable<int>(sequence);
+    return map;
+  }
+
+  CrmStagesCompanion toCompanion(bool nullToAbsent) {
+    return CrmStagesCompanion(
+      id: Value(id),
+      name: Value(name),
+      sequence: Value(sequence),
+    );
+  }
+
+  factory CrmStage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CrmStage(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      sequence: serializer.fromJson<int>(json['sequence']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'sequence': serializer.toJson<int>(sequence),
+    };
+  }
+
+  CrmStage copyWith({int? id, String? name, int? sequence}) => CrmStage(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    sequence: sequence ?? this.sequence,
+  );
+  CrmStage copyWithCompanion(CrmStagesCompanion data) {
+    return CrmStage(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      sequence: data.sequence.present ? data.sequence.value : this.sequence,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrmStage(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('sequence: $sequence')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, sequence);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CrmStage &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.sequence == this.sequence);
+}
+
+class CrmStagesCompanion extends UpdateCompanion<CrmStage> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<int> sequence;
+  const CrmStagesCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.sequence = const Value.absent(),
+  });
+  CrmStagesCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    this.sequence = const Value.absent(),
+  }) : name = Value(name);
+  static Insertable<CrmStage> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<int>? sequence,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (sequence != null) 'sequence': sequence,
+    });
+  }
+
+  CrmStagesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<int>? sequence,
+  }) {
+    return CrmStagesCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      sequence: sequence ?? this.sequence,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (sequence.present) {
+      map['sequence'] = Variable<int>(sequence.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CrmStagesCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('sequence: $sequence')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SaleOrdersTable extends SaleOrders
+    with TableInfo<$SaleOrdersTable, SaleOrder> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SaleOrdersTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _partnerNameMeta = const VerificationMeta(
+    'partnerName',
+  );
+  @override
+  late final GeneratedColumn<String> partnerName = GeneratedColumn<String>(
+    'partner_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _amountTotalMeta = const VerificationMeta(
+    'amountTotal',
+  );
+  @override
+  late final GeneratedColumn<double> amountTotal = GeneratedColumn<double>(
+    'amount_total',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _dateOrderMeta = const VerificationMeta(
+    'dateOrder',
+  );
+  @override
+  late final GeneratedColumn<DateTime> dateOrder = GeneratedColumn<DateTime>(
+    'date_order',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    state,
+    partnerName,
+    amountTotal,
+    dateOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sale_orders';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SaleOrder> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stateMeta);
+    }
+    if (data.containsKey('partner_name')) {
+      context.handle(
+        _partnerNameMeta,
+        partnerName.isAcceptableOrUnknown(
+          data['partner_name']!,
+          _partnerNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('amount_total')) {
+      context.handle(
+        _amountTotalMeta,
+        amountTotal.isAcceptableOrUnknown(
+          data['amount_total']!,
+          _amountTotalMeta,
+        ),
+      );
+    }
+    if (data.containsKey('date_order')) {
+      context.handle(
+        _dateOrderMeta,
+        dateOrder.isAcceptableOrUnknown(data['date_order']!, _dateOrderMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SaleOrder map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SaleOrder(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      partnerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}partner_name'],
+      )!,
+      amountTotal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount_total'],
+      )!,
+      dateOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date_order'],
+      ),
+    );
+  }
+
+  @override
+  $SaleOrdersTable createAlias(String alias) {
+    return $SaleOrdersTable(attachedDatabase, alias);
+  }
+}
+
+class SaleOrder extends DataClass implements Insertable<SaleOrder> {
+  final int id;
+  final String name;
+  final String state;
+  final String partnerName;
+  final double amountTotal;
+  final DateTime? dateOrder;
+  const SaleOrder({
+    required this.id,
+    required this.name,
+    required this.state,
+    required this.partnerName,
+    required this.amountTotal,
+    this.dateOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['state'] = Variable<String>(state);
+    map['partner_name'] = Variable<String>(partnerName);
+    map['amount_total'] = Variable<double>(amountTotal);
+    if (!nullToAbsent || dateOrder != null) {
+      map['date_order'] = Variable<DateTime>(dateOrder);
+    }
+    return map;
+  }
+
+  SaleOrdersCompanion toCompanion(bool nullToAbsent) {
+    return SaleOrdersCompanion(
+      id: Value(id),
+      name: Value(name),
+      state: Value(state),
+      partnerName: Value(partnerName),
+      amountTotal: Value(amountTotal),
+      dateOrder: dateOrder == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dateOrder),
+    );
+  }
+
+  factory SaleOrder.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SaleOrder(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      state: serializer.fromJson<String>(json['state']),
+      partnerName: serializer.fromJson<String>(json['partnerName']),
+      amountTotal: serializer.fromJson<double>(json['amountTotal']),
+      dateOrder: serializer.fromJson<DateTime?>(json['dateOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'state': serializer.toJson<String>(state),
+      'partnerName': serializer.toJson<String>(partnerName),
+      'amountTotal': serializer.toJson<double>(amountTotal),
+      'dateOrder': serializer.toJson<DateTime?>(dateOrder),
+    };
+  }
+
+  SaleOrder copyWith({
+    int? id,
+    String? name,
+    String? state,
+    String? partnerName,
+    double? amountTotal,
+    Value<DateTime?> dateOrder = const Value.absent(),
+  }) => SaleOrder(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    state: state ?? this.state,
+    partnerName: partnerName ?? this.partnerName,
+    amountTotal: amountTotal ?? this.amountTotal,
+    dateOrder: dateOrder.present ? dateOrder.value : this.dateOrder,
+  );
+  SaleOrder copyWithCompanion(SaleOrdersCompanion data) {
+    return SaleOrder(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      state: data.state.present ? data.state.value : this.state,
+      partnerName: data.partnerName.present
+          ? data.partnerName.value
+          : this.partnerName,
+      amountTotal: data.amountTotal.present
+          ? data.amountTotal.value
+          : this.amountTotal,
+      dateOrder: data.dateOrder.present ? data.dateOrder.value : this.dateOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SaleOrder(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('state: $state, ')
+          ..write('partnerName: $partnerName, ')
+          ..write('amountTotal: $amountTotal, ')
+          ..write('dateOrder: $dateOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, name, state, partnerName, amountTotal, dateOrder);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SaleOrder &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.state == this.state &&
+          other.partnerName == this.partnerName &&
+          other.amountTotal == this.amountTotal &&
+          other.dateOrder == this.dateOrder);
+}
+
+class SaleOrdersCompanion extends UpdateCompanion<SaleOrder> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> state;
+  final Value<String> partnerName;
+  final Value<double> amountTotal;
+  final Value<DateTime?> dateOrder;
+  const SaleOrdersCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.state = const Value.absent(),
+    this.partnerName = const Value.absent(),
+    this.amountTotal = const Value.absent(),
+    this.dateOrder = const Value.absent(),
+  });
+  SaleOrdersCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String state,
+    this.partnerName = const Value.absent(),
+    this.amountTotal = const Value.absent(),
+    this.dateOrder = const Value.absent(),
+  }) : name = Value(name),
+       state = Value(state);
+  static Insertable<SaleOrder> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? state,
+    Expression<String>? partnerName,
+    Expression<double>? amountTotal,
+    Expression<DateTime>? dateOrder,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (state != null) 'state': state,
+      if (partnerName != null) 'partner_name': partnerName,
+      if (amountTotal != null) 'amount_total': amountTotal,
+      if (dateOrder != null) 'date_order': dateOrder,
+    });
+  }
+
+  SaleOrdersCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? state,
+    Value<String>? partnerName,
+    Value<double>? amountTotal,
+    Value<DateTime?>? dateOrder,
+  }) {
+    return SaleOrdersCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      state: state ?? this.state,
+      partnerName: partnerName ?? this.partnerName,
+      amountTotal: amountTotal ?? this.amountTotal,
+      dateOrder: dateOrder ?? this.dateOrder,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (partnerName.present) {
+      map['partner_name'] = Variable<String>(partnerName.value);
+    }
+    if (amountTotal.present) {
+      map['amount_total'] = Variable<double>(amountTotal.value);
+    }
+    if (dateOrder.present) {
+      map['date_order'] = Variable<DateTime>(dateOrder.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SaleOrdersCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('state: $state, ')
+          ..write('partnerName: $partnerName, ')
+          ..write('amountTotal: $amountTotal, ')
+          ..write('dateOrder: $dateOrder')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SaleOrderLinesTable extends SaleOrderLines
+    with TableInfo<$SaleOrderLinesTable, SaleOrderLine> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SaleOrderLinesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _orderIdMeta = const VerificationMeta(
+    'orderId',
+  );
+  @override
+  late final GeneratedColumn<int> orderId = GeneratedColumn<int>(
+    'order_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _priceSubtotalMeta = const VerificationMeta(
+    'priceSubtotal',
+  );
+  @override
+  late final GeneratedColumn<double> priceSubtotal = GeneratedColumn<double>(
+    'price_subtotal',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    orderId,
+    description,
+    quantity,
+    priceSubtotal,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sale_order_lines';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SaleOrderLine> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('order_id')) {
+      context.handle(
+        _orderIdMeta,
+        orderId.isAcceptableOrUnknown(data['order_id']!, _orderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderIdMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('price_subtotal')) {
+      context.handle(
+        _priceSubtotalMeta,
+        priceSubtotal.isAcceptableOrUnknown(
+          data['price_subtotal']!,
+          _priceSubtotalMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SaleOrderLine map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SaleOrderLine(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      orderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order_id'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      )!,
+      priceSubtotal: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}price_subtotal'],
+      )!,
+    );
+  }
+
+  @override
+  $SaleOrderLinesTable createAlias(String alias) {
+    return $SaleOrderLinesTable(attachedDatabase, alias);
+  }
+}
+
+class SaleOrderLine extends DataClass implements Insertable<SaleOrderLine> {
+  final int id;
+  final int orderId;
+  final String description;
+  final double quantity;
+  final double priceSubtotal;
+  const SaleOrderLine({
+    required this.id,
+    required this.orderId,
+    required this.description,
+    required this.quantity,
+    required this.priceSubtotal,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['order_id'] = Variable<int>(orderId);
+    map['description'] = Variable<String>(description);
+    map['quantity'] = Variable<double>(quantity);
+    map['price_subtotal'] = Variable<double>(priceSubtotal);
+    return map;
+  }
+
+  SaleOrderLinesCompanion toCompanion(bool nullToAbsent) {
+    return SaleOrderLinesCompanion(
+      id: Value(id),
+      orderId: Value(orderId),
+      description: Value(description),
+      quantity: Value(quantity),
+      priceSubtotal: Value(priceSubtotal),
+    );
+  }
+
+  factory SaleOrderLine.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SaleOrderLine(
+      id: serializer.fromJson<int>(json['id']),
+      orderId: serializer.fromJson<int>(json['orderId']),
+      description: serializer.fromJson<String>(json['description']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      priceSubtotal: serializer.fromJson<double>(json['priceSubtotal']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'orderId': serializer.toJson<int>(orderId),
+      'description': serializer.toJson<String>(description),
+      'quantity': serializer.toJson<double>(quantity),
+      'priceSubtotal': serializer.toJson<double>(priceSubtotal),
+    };
+  }
+
+  SaleOrderLine copyWith({
+    int? id,
+    int? orderId,
+    String? description,
+    double? quantity,
+    double? priceSubtotal,
+  }) => SaleOrderLine(
+    id: id ?? this.id,
+    orderId: orderId ?? this.orderId,
+    description: description ?? this.description,
+    quantity: quantity ?? this.quantity,
+    priceSubtotal: priceSubtotal ?? this.priceSubtotal,
+  );
+  SaleOrderLine copyWithCompanion(SaleOrderLinesCompanion data) {
+    return SaleOrderLine(
+      id: data.id.present ? data.id.value : this.id,
+      orderId: data.orderId.present ? data.orderId.value : this.orderId,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      priceSubtotal: data.priceSubtotal.present
+          ? data.priceSubtotal.value
+          : this.priceSubtotal,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SaleOrderLine(')
+          ..write('id: $id, ')
+          ..write('orderId: $orderId, ')
+          ..write('description: $description, ')
+          ..write('quantity: $quantity, ')
+          ..write('priceSubtotal: $priceSubtotal')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, orderId, description, quantity, priceSubtotal);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SaleOrderLine &&
+          other.id == this.id &&
+          other.orderId == this.orderId &&
+          other.description == this.description &&
+          other.quantity == this.quantity &&
+          other.priceSubtotal == this.priceSubtotal);
+}
+
+class SaleOrderLinesCompanion extends UpdateCompanion<SaleOrderLine> {
+  final Value<int> id;
+  final Value<int> orderId;
+  final Value<String> description;
+  final Value<double> quantity;
+  final Value<double> priceSubtotal;
+  const SaleOrderLinesCompanion({
+    this.id = const Value.absent(),
+    this.orderId = const Value.absent(),
+    this.description = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.priceSubtotal = const Value.absent(),
+  });
+  SaleOrderLinesCompanion.insert({
+    this.id = const Value.absent(),
+    required int orderId,
+    this.description = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.priceSubtotal = const Value.absent(),
+  }) : orderId = Value(orderId);
+  static Insertable<SaleOrderLine> custom({
+    Expression<int>? id,
+    Expression<int>? orderId,
+    Expression<String>? description,
+    Expression<double>? quantity,
+    Expression<double>? priceSubtotal,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (orderId != null) 'order_id': orderId,
+      if (description != null) 'description': description,
+      if (quantity != null) 'quantity': quantity,
+      if (priceSubtotal != null) 'price_subtotal': priceSubtotal,
+    });
+  }
+
+  SaleOrderLinesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? orderId,
+    Value<String>? description,
+    Value<double>? quantity,
+    Value<double>? priceSubtotal,
+  }) {
+    return SaleOrderLinesCompanion(
+      id: id ?? this.id,
+      orderId: orderId ?? this.orderId,
+      description: description ?? this.description,
+      quantity: quantity ?? this.quantity,
+      priceSubtotal: priceSubtotal ?? this.priceSubtotal,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (orderId.present) {
+      map['order_id'] = Variable<int>(orderId.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (priceSubtotal.present) {
+      map['price_subtotal'] = Variable<double>(priceSubtotal.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SaleOrderLinesCompanion(')
+          ..write('id: $id, ')
+          ..write('orderId: $orderId, ')
+          ..write('description: $description, ')
+          ..write('quantity: $quantity, ')
+          ..write('priceSubtotal: $priceSubtotal')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1558,6 +3044,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $MoveLinesTable moveLines = $MoveLinesTable(this);
   late final $ProductsTable products = $ProductsTable(this);
   late final $OpQueueTable opQueue = $OpQueueTable(this);
+  late final $LeadsTable leads = $LeadsTable(this);
+  late final $CrmStagesTable crmStages = $CrmStagesTable(this);
+  late final $SaleOrdersTable saleOrders = $SaleOrdersTable(this);
+  late final $SaleOrderLinesTable saleOrderLines = $SaleOrderLinesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1567,6 +3057,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     moveLines,
     products,
     opQueue,
+    leads,
+    crmStages,
+    saleOrders,
+    saleOrderLines,
   ];
 }
 
@@ -2387,6 +3881,814 @@ typedef $$OpQueueTableProcessedTableManager =
       OpQueueData,
       PrefetchHooks Function()
     >;
+typedef $$LeadsTableCreateCompanionBuilder =
+    LeadsCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<String> partnerName,
+      Value<int?> stageId,
+      Value<String> stageName,
+      Value<double> expectedRevenue,
+      Value<String> phone,
+      Value<String> email,
+    });
+typedef $$LeadsTableUpdateCompanionBuilder =
+    LeadsCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> partnerName,
+      Value<int?> stageId,
+      Value<String> stageName,
+      Value<double> expectedRevenue,
+      Value<String> phone,
+      Value<String> email,
+    });
+
+class $$LeadsTableFilterComposer extends Composer<_$AppDatabase, $LeadsTable> {
+  $$LeadsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get partnerName => $composableBuilder(
+    column: $table.partnerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get stageId => $composableBuilder(
+    column: $table.stageId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stageName => $composableBuilder(
+    column: $table.stageName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get expectedRevenue => $composableBuilder(
+    column: $table.expectedRevenue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LeadsTableOrderingComposer
+    extends Composer<_$AppDatabase, $LeadsTable> {
+  $$LeadsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get partnerName => $composableBuilder(
+    column: $table.partnerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get stageId => $composableBuilder(
+    column: $table.stageId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stageName => $composableBuilder(
+    column: $table.stageName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get expectedRevenue => $composableBuilder(
+    column: $table.expectedRevenue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get phone => $composableBuilder(
+    column: $table.phone,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get email => $composableBuilder(
+    column: $table.email,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LeadsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $LeadsTable> {
+  $$LeadsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get partnerName => $composableBuilder(
+    column: $table.partnerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get stageId =>
+      $composableBuilder(column: $table.stageId, builder: (column) => column);
+
+  GeneratedColumn<String> get stageName =>
+      $composableBuilder(column: $table.stageName, builder: (column) => column);
+
+  GeneratedColumn<double> get expectedRevenue => $composableBuilder(
+    column: $table.expectedRevenue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get phone =>
+      $composableBuilder(column: $table.phone, builder: (column) => column);
+
+  GeneratedColumn<String> get email =>
+      $composableBuilder(column: $table.email, builder: (column) => column);
+}
+
+class $$LeadsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $LeadsTable,
+          Lead,
+          $$LeadsTableFilterComposer,
+          $$LeadsTableOrderingComposer,
+          $$LeadsTableAnnotationComposer,
+          $$LeadsTableCreateCompanionBuilder,
+          $$LeadsTableUpdateCompanionBuilder,
+          (Lead, BaseReferences<_$AppDatabase, $LeadsTable, Lead>),
+          Lead,
+          PrefetchHooks Function()
+        > {
+  $$LeadsTableTableManager(_$AppDatabase db, $LeadsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$LeadsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$LeadsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$LeadsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> partnerName = const Value.absent(),
+                Value<int?> stageId = const Value.absent(),
+                Value<String> stageName = const Value.absent(),
+                Value<double> expectedRevenue = const Value.absent(),
+                Value<String> phone = const Value.absent(),
+                Value<String> email = const Value.absent(),
+              }) => LeadsCompanion(
+                id: id,
+                name: name,
+                partnerName: partnerName,
+                stageId: stageId,
+                stageName: stageName,
+                expectedRevenue: expectedRevenue,
+                phone: phone,
+                email: email,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<String> partnerName = const Value.absent(),
+                Value<int?> stageId = const Value.absent(),
+                Value<String> stageName = const Value.absent(),
+                Value<double> expectedRevenue = const Value.absent(),
+                Value<String> phone = const Value.absent(),
+                Value<String> email = const Value.absent(),
+              }) => LeadsCompanion.insert(
+                id: id,
+                name: name,
+                partnerName: partnerName,
+                stageId: stageId,
+                stageName: stageName,
+                expectedRevenue: expectedRevenue,
+                phone: phone,
+                email: email,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LeadsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $LeadsTable,
+      Lead,
+      $$LeadsTableFilterComposer,
+      $$LeadsTableOrderingComposer,
+      $$LeadsTableAnnotationComposer,
+      $$LeadsTableCreateCompanionBuilder,
+      $$LeadsTableUpdateCompanionBuilder,
+      (Lead, BaseReferences<_$AppDatabase, $LeadsTable, Lead>),
+      Lead,
+      PrefetchHooks Function()
+    >;
+typedef $$CrmStagesTableCreateCompanionBuilder =
+    CrmStagesCompanion Function({
+      Value<int> id,
+      required String name,
+      Value<int> sequence,
+    });
+typedef $$CrmStagesTableUpdateCompanionBuilder =
+    CrmStagesCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<int> sequence,
+    });
+
+class $$CrmStagesTableFilterComposer
+    extends Composer<_$AppDatabase, $CrmStagesTable> {
+  $$CrmStagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sequence => $composableBuilder(
+    column: $table.sequence,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CrmStagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CrmStagesTable> {
+  $$CrmStagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sequence => $composableBuilder(
+    column: $table.sequence,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CrmStagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CrmStagesTable> {
+  $$CrmStagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<int> get sequence =>
+      $composableBuilder(column: $table.sequence, builder: (column) => column);
+}
+
+class $$CrmStagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CrmStagesTable,
+          CrmStage,
+          $$CrmStagesTableFilterComposer,
+          $$CrmStagesTableOrderingComposer,
+          $$CrmStagesTableAnnotationComposer,
+          $$CrmStagesTableCreateCompanionBuilder,
+          $$CrmStagesTableUpdateCompanionBuilder,
+          (CrmStage, BaseReferences<_$AppDatabase, $CrmStagesTable, CrmStage>),
+          CrmStage,
+          PrefetchHooks Function()
+        > {
+  $$CrmStagesTableTableManager(_$AppDatabase db, $CrmStagesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CrmStagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CrmStagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CrmStagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int> sequence = const Value.absent(),
+              }) => CrmStagesCompanion(id: id, name: name, sequence: sequence),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                Value<int> sequence = const Value.absent(),
+              }) => CrmStagesCompanion.insert(
+                id: id,
+                name: name,
+                sequence: sequence,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CrmStagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CrmStagesTable,
+      CrmStage,
+      $$CrmStagesTableFilterComposer,
+      $$CrmStagesTableOrderingComposer,
+      $$CrmStagesTableAnnotationComposer,
+      $$CrmStagesTableCreateCompanionBuilder,
+      $$CrmStagesTableUpdateCompanionBuilder,
+      (CrmStage, BaseReferences<_$AppDatabase, $CrmStagesTable, CrmStage>),
+      CrmStage,
+      PrefetchHooks Function()
+    >;
+typedef $$SaleOrdersTableCreateCompanionBuilder =
+    SaleOrdersCompanion Function({
+      Value<int> id,
+      required String name,
+      required String state,
+      Value<String> partnerName,
+      Value<double> amountTotal,
+      Value<DateTime?> dateOrder,
+    });
+typedef $$SaleOrdersTableUpdateCompanionBuilder =
+    SaleOrdersCompanion Function({
+      Value<int> id,
+      Value<String> name,
+      Value<String> state,
+      Value<String> partnerName,
+      Value<double> amountTotal,
+      Value<DateTime?> dateOrder,
+    });
+
+class $$SaleOrdersTableFilterComposer
+    extends Composer<_$AppDatabase, $SaleOrdersTable> {
+  $$SaleOrdersTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get partnerName => $composableBuilder(
+    column: $table.partnerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amountTotal => $composableBuilder(
+    column: $table.amountTotal,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get dateOrder => $composableBuilder(
+    column: $table.dateOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SaleOrdersTableOrderingComposer
+    extends Composer<_$AppDatabase, $SaleOrdersTable> {
+  $$SaleOrdersTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get partnerName => $composableBuilder(
+    column: $table.partnerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amountTotal => $composableBuilder(
+    column: $table.amountTotal,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get dateOrder => $composableBuilder(
+    column: $table.dateOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SaleOrdersTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SaleOrdersTable> {
+  $$SaleOrdersTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<String> get partnerName => $composableBuilder(
+    column: $table.partnerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get amountTotal => $composableBuilder(
+    column: $table.amountTotal,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get dateOrder =>
+      $composableBuilder(column: $table.dateOrder, builder: (column) => column);
+}
+
+class $$SaleOrdersTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SaleOrdersTable,
+          SaleOrder,
+          $$SaleOrdersTableFilterComposer,
+          $$SaleOrdersTableOrderingComposer,
+          $$SaleOrdersTableAnnotationComposer,
+          $$SaleOrdersTableCreateCompanionBuilder,
+          $$SaleOrdersTableUpdateCompanionBuilder,
+          (
+            SaleOrder,
+            BaseReferences<_$AppDatabase, $SaleOrdersTable, SaleOrder>,
+          ),
+          SaleOrder,
+          PrefetchHooks Function()
+        > {
+  $$SaleOrdersTableTableManager(_$AppDatabase db, $SaleOrdersTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SaleOrdersTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SaleOrdersTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SaleOrdersTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<String> partnerName = const Value.absent(),
+                Value<double> amountTotal = const Value.absent(),
+                Value<DateTime?> dateOrder = const Value.absent(),
+              }) => SaleOrdersCompanion(
+                id: id,
+                name: name,
+                state: state,
+                partnerName: partnerName,
+                amountTotal: amountTotal,
+                dateOrder: dateOrder,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String state,
+                Value<String> partnerName = const Value.absent(),
+                Value<double> amountTotal = const Value.absent(),
+                Value<DateTime?> dateOrder = const Value.absent(),
+              }) => SaleOrdersCompanion.insert(
+                id: id,
+                name: name,
+                state: state,
+                partnerName: partnerName,
+                amountTotal: amountTotal,
+                dateOrder: dateOrder,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SaleOrdersTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SaleOrdersTable,
+      SaleOrder,
+      $$SaleOrdersTableFilterComposer,
+      $$SaleOrdersTableOrderingComposer,
+      $$SaleOrdersTableAnnotationComposer,
+      $$SaleOrdersTableCreateCompanionBuilder,
+      $$SaleOrdersTableUpdateCompanionBuilder,
+      (SaleOrder, BaseReferences<_$AppDatabase, $SaleOrdersTable, SaleOrder>),
+      SaleOrder,
+      PrefetchHooks Function()
+    >;
+typedef $$SaleOrderLinesTableCreateCompanionBuilder =
+    SaleOrderLinesCompanion Function({
+      Value<int> id,
+      required int orderId,
+      Value<String> description,
+      Value<double> quantity,
+      Value<double> priceSubtotal,
+    });
+typedef $$SaleOrderLinesTableUpdateCompanionBuilder =
+    SaleOrderLinesCompanion Function({
+      Value<int> id,
+      Value<int> orderId,
+      Value<String> description,
+      Value<double> quantity,
+      Value<double> priceSubtotal,
+    });
+
+class $$SaleOrderLinesTableFilterComposer
+    extends Composer<_$AppDatabase, $SaleOrderLinesTable> {
+  $$SaleOrderLinesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get priceSubtotal => $composableBuilder(
+    column: $table.priceSubtotal,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SaleOrderLinesTableOrderingComposer
+    extends Composer<_$AppDatabase, $SaleOrderLinesTable> {
+  $$SaleOrderLinesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get priceSubtotal => $composableBuilder(
+    column: $table.priceSubtotal,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SaleOrderLinesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SaleOrderLinesTable> {
+  $$SaleOrderLinesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<int> get orderId =>
+      $composableBuilder(column: $table.orderId, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<double> get priceSubtotal => $composableBuilder(
+    column: $table.priceSubtotal,
+    builder: (column) => column,
+  );
+}
+
+class $$SaleOrderLinesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SaleOrderLinesTable,
+          SaleOrderLine,
+          $$SaleOrderLinesTableFilterComposer,
+          $$SaleOrderLinesTableOrderingComposer,
+          $$SaleOrderLinesTableAnnotationComposer,
+          $$SaleOrderLinesTableCreateCompanionBuilder,
+          $$SaleOrderLinesTableUpdateCompanionBuilder,
+          (
+            SaleOrderLine,
+            BaseReferences<_$AppDatabase, $SaleOrderLinesTable, SaleOrderLine>,
+          ),
+          SaleOrderLine,
+          PrefetchHooks Function()
+        > {
+  $$SaleOrderLinesTableTableManager(
+    _$AppDatabase db,
+    $SaleOrderLinesTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SaleOrderLinesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SaleOrderLinesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SaleOrderLinesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> orderId = const Value.absent(),
+                Value<String> description = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<double> priceSubtotal = const Value.absent(),
+              }) => SaleOrderLinesCompanion(
+                id: id,
+                orderId: orderId,
+                description: description,
+                quantity: quantity,
+                priceSubtotal: priceSubtotal,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int orderId,
+                Value<String> description = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<double> priceSubtotal = const Value.absent(),
+              }) => SaleOrderLinesCompanion.insert(
+                id: id,
+                orderId: orderId,
+                description: description,
+                quantity: quantity,
+                priceSubtotal: priceSubtotal,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SaleOrderLinesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SaleOrderLinesTable,
+      SaleOrderLine,
+      $$SaleOrderLinesTableFilterComposer,
+      $$SaleOrderLinesTableOrderingComposer,
+      $$SaleOrderLinesTableAnnotationComposer,
+      $$SaleOrderLinesTableCreateCompanionBuilder,
+      $$SaleOrderLinesTableUpdateCompanionBuilder,
+      (
+        SaleOrderLine,
+        BaseReferences<_$AppDatabase, $SaleOrderLinesTable, SaleOrderLine>,
+      ),
+      SaleOrderLine,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2399,4 +4701,12 @@ class $AppDatabaseManager {
       $$ProductsTableTableManager(_db, _db.products);
   $$OpQueueTableTableManager get opQueue =>
       $$OpQueueTableTableManager(_db, _db.opQueue);
+  $$LeadsTableTableManager get leads =>
+      $$LeadsTableTableManager(_db, _db.leads);
+  $$CrmStagesTableTableManager get crmStages =>
+      $$CrmStagesTableTableManager(_db, _db.crmStages);
+  $$SaleOrdersTableTableManager get saleOrders =>
+      $$SaleOrdersTableTableManager(_db, _db.saleOrders);
+  $$SaleOrderLinesTableTableManager get saleOrderLines =>
+      $$SaleOrderLinesTableTableManager(_db, _db.saleOrderLines);
 }

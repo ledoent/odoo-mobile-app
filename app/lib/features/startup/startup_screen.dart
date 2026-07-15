@@ -20,7 +20,7 @@ class StartupScreen extends ConsumerWidget {
       if (session == null) {
         router.replaceAll([const OnboardingRoute()]);
       } else {
-        router.replaceAll([const PickingsRoute()]);
+        router.replaceAll([const HomeRoute()]);
       }
     });
     return const Scaffold(body: Center(child: CircularProgressIndicator()));

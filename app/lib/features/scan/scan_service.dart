@@ -39,11 +39,7 @@ class ScanService {
       final newQty = line.quantity + 1;
       final op = SetQuantityOp(moveLineId: line.id, quantity: newQty);
       await _db.setLocalMoveLineQuantity(line.id, newQty);
-      await _db.enqueueOp(
-        uuid: op.uuid,
-        kind: op.kind,
-        payload: op.encodePayload(),
-      );
+      await _db.enqueue(op);
       return ScanApplied(productName: product.name, newQuantity: newQty);
     }
 
@@ -59,11 +55,7 @@ class ScanService {
         quantity: 1,
         localMoveLineId: line.id,
       );
-      await _db.enqueueOp(
-        uuid: op.uuid,
-        kind: op.kind,
-        payload: op.encodePayload(),
-      );
+      await _db.enqueue(op);
       return ScanApplied(productName: product.name, newQuantity: newQty);
     }
 
@@ -80,11 +72,7 @@ class ScanService {
       quantity: 1,
       localMoveLineId: localId,
     );
-    await _db.enqueueOp(
-      uuid: op.uuid,
-      kind: op.kind,
-      payload: op.encodePayload(),
-    );
+    await _db.enqueue(op);
     return ScanApplied(productName: product.name, newQuantity: 1);
   }
 
@@ -97,10 +85,6 @@ class ScanService {
       createBackorder: createBackorder,
     );
     await _db.setLocalPickingState(pickingId, 'done');
-    await _db.enqueueOp(
-      uuid: op.uuid,
-      kind: op.kind,
-      payload: op.encodePayload(),
-    );
+    await _db.enqueue(op);
   }
 }
