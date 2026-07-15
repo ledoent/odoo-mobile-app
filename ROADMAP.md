@@ -19,8 +19,9 @@ server business logic.
 | Feature | Status |
 |---|---|
 | API-key / password auth (JSON-RPC), secure storage | ✅ |
-| Drift mirrors + outbound op queue (client-UUID idempotency) | ✅ |
-| Sync engine: ordered drain, offline retry, conflict surfacing | ✅ |
+| Drift mirrors + outbound op queue | ✅ |
+| Sync engine: ordered drain, offline retry, conflict + auth-failure surfacing | ✅ |
+| Replay safety: quantity ops absolute-set; validate/confirm state-guarded; **creates are at-least-once over raw JSON-RPC** (true UUID dedup needs `stock_barcode_api`'s idempotency ledger) | ⚠️ partial |
 | Conflict UX: badge + retry/discard sheet | ✅ (new) |
 | Auth failures keep ops pending (never silently dropped) | ✅ (new) |
 | Connectivity-triggered sync | ✅ |
