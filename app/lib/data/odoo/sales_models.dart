@@ -1,6 +1,8 @@
 /// DTOs for the Sales working set (my open quotations).
 library;
 
+import 'odoo_json.dart';
+
 class RemoteSaleOrder {
   const RemoteSaleOrder({
     required this.id,
@@ -19,15 +21,12 @@ class RemoteSaleOrder {
   final DateTime? dateOrder;
 
   factory RemoteSaleOrder.fromJson(Map<String, dynamic> json) {
-    final partner = json['partner_id'];
     final date = json['date_order'];
     return RemoteSaleOrder(
       id: json['id'] as int,
       name: json['name'] as String,
       state: json['state'] as String,
-      partnerName: partner is List && partner.length > 1
-          ? partner[1] as String
-          : '',
+      partnerName: relName(json['partner_id']),
       amountTotal: (json['amount_total'] as num? ?? 0).toDouble(),
       dateOrder: date is String ? DateTime.tryParse(date) : null,
     );
@@ -49,14 +48,12 @@ class RemoteSaleOrderLine {
   final double quantity;
   final double priceSubtotal;
 
-  factory RemoteSaleOrderLine.fromJson(Map<String, dynamic> json) {
-    final order = json['order_id'];
-    return RemoteSaleOrderLine(
-      id: json['id'] as int,
-      orderId: order is List ? order[0] as int : order as int,
-      description: json['name'] as String? ?? '',
-      quantity: (json['product_uom_qty'] as num? ?? 0).toDouble(),
-      priceSubtotal: (json['price_subtotal'] as num? ?? 0).toDouble(),
-    );
-  }
+  factory RemoteSaleOrderLine.fromJson(Map<String, dynamic> json) =>
+      RemoteSaleOrderLine(
+        id: json['id'] as int,
+        orderId: relId(json['order_id'])!,
+        description: odooString(json['name']),
+        quantity: (json['product_uom_qty'] as num? ?? 0).toDouble(),
+        priceSubtotal: (json['price_subtotal'] as num? ?? 0).toDouble(),
+      );
 }

@@ -10,10 +10,6 @@ class SalesService {
   Future<void> confirmOrder({required int orderId}) async {
     final op = ConfirmSaleOrderOp(orderId: orderId);
     await _db.setLocalSaleOrderState(orderId, 'sale');
-    await _db.enqueueOp(
-      uuid: op.uuid,
-      kind: op.kind,
-      payload: op.encodePayload(),
-    );
+    await _db.enqueue(op);
   }
 }

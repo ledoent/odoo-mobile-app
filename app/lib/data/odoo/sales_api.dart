@@ -49,6 +49,18 @@ class JsonRpcSalesApi implements SalesApi {
 
   @override
   Future<void> confirmOrder({required int orderId}) async {
+    // Replay tolerance: a retry after a lost response must not fail on an
+    // order that the first attempt already confirmed.
+    final rows = await _client.searchRead(
+      'sale.order',
+      [
+        ['id', '=', orderId],
+      ],
+      ['state'],
+      limit: 1,
+    );
+    final state = rows.isEmpty ? null : rows.first['state'] as String?;
+    if (state == null || state == 'sale' || state == 'done') return;
     await _client.executeKw('sale.order', 'action_confirm', [
       [orderId],
     ]);

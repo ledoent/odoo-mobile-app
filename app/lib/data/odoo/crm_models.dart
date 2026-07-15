@@ -1,10 +1,7 @@
 /// DTOs for the CRM working set (my open pipeline).
 library;
 
-String _rel(dynamic value) =>
-    value is List && value.length > 1 ? value[1] as String : '';
-
-int? _relId(dynamic value) => value is List ? value[0] as int : null;
+import 'odoo_json.dart';
 
 class RemoteLead {
   const RemoteLead({
@@ -29,17 +26,15 @@ class RemoteLead {
 
   factory RemoteLead.fromJson(Map<String, dynamic> json) => RemoteLead(
     id: json['id'] as int,
-    name: json['name'] as String? ?? '',
-    partnerName: _rel(json['partner_id']).isNotEmpty
-        ? _rel(json['partner_id'])
-        : (json['contact_name'] is String
-              ? json['contact_name'] as String
-              : ''),
-    stageId: _relId(json['stage_id']),
-    stageName: _rel(json['stage_id']),
+    name: odooString(json['name']),
+    partnerName: relName(json['partner_id']).isNotEmpty
+        ? relName(json['partner_id'])
+        : odooString(json['contact_name']),
+    stageId: relId(json['stage_id']),
+    stageName: relName(json['stage_id']),
     expectedRevenue: (json['expected_revenue'] as num? ?? 0).toDouble(),
-    phone: json['phone'] is String ? json['phone'] as String : '',
-    email: json['email_from'] is String ? json['email_from'] as String : '',
+    phone: odooString(json['phone']),
+    email: odooString(json['email_from']),
   );
 }
 

@@ -139,6 +139,18 @@ class JsonRpcScannerApi implements ScannerApi {
     required int pickingId,
     bool createBackorder = true,
   }) async {
+    // Replay tolerance: skip if a previous (response-lost) attempt already
+    // validated this picking.
+    final rows = await _client.searchRead(
+      'stock.picking',
+      [
+        ['id', '=', pickingId],
+      ],
+      ['state'],
+      limit: 1,
+    );
+    final state = rows.isEmpty ? null : rows.first['state'] as String?;
+    if (state == null || state == 'done' || state == 'cancel') return;
     final result = await _client.executeKw('stock.picking', 'button_validate', [
       [pickingId],
     ]);

@@ -2,31 +2,34 @@ import 'package:dio/dio.dart';
 import 'package:odoo_scanner/data/odoo/crm_api.dart';
 import 'package:odoo_scanner/data/odoo/crm_models.dart';
 import 'package:odoo_scanner/data/odoo/models.dart';
+import 'package:odoo_scanner/data/odoo/odoo_client.dart';
 import 'package:odoo_scanner/data/odoo/sales_api.dart';
 import 'package:odoo_scanner/data/odoo/sales_models.dart';
-import 'package:odoo_scanner/data/odoo/odoo_client.dart';
 import 'package:odoo_scanner/data/odoo/scanner_api.dart';
 
-/// In-memory fake Odoo. Records applied ops; can be scripted to fail with
-/// transport errors (offline) or RPC errors (server-side conflicts).
-class FakeScannerApi implements ScannerApi {
-  final List<String> applied = [];
-
-  List<RemotePicking> pickings = [];
-  List<RemoteMoveLine> moveLines = [];
-  List<RemoteProduct> products = [];
-
-  /// When set, the next write throws this and it resets to null.
+/// Scriptable one-shot failure: set [nextError] and the next write throws it.
+mixin ThrowOnce {
   Object? nextError;
-  int _createdId = 1000;
 
-  void _maybeThrow() {
+  void maybeThrow() {
     final error = nextError;
     if (error != null) {
       nextError = null;
       throw error;
     }
   }
+}
+
+/// In-memory fake Odoo. Records applied ops; can be scripted to fail with
+/// transport errors (offline), RPC errors (conflicts), or auth errors.
+class FakeScannerApi with ThrowOnce implements ScannerApi {
+  final List<String> applied = [];
+
+  List<RemotePicking> pickings = [];
+  List<RemoteMoveLine> moveLines = [];
+  List<RemoteProduct> products = [];
+
+  int _createdId = 1000;
 
   static DioException offline() => DioException(
     requestOptions: RequestOptions(path: '/jsonrpc'),
@@ -34,6 +37,8 @@ class FakeScannerApi implements ScannerApi {
   );
 
   static OdooRpcException conflict(String message) => OdooRpcException(message);
+
+  static OdooAuthException authFailure() => OdooAuthException('Access Denied');
 
   @override
   Future<List<RemotePicking>> fetchOpenPickings({
@@ -58,7 +63,7 @@ class FakeScannerApi implements ScannerApi {
     required int moveLineId,
     required double quantity,
   }) async {
-    _maybeThrow();
+    maybeThrow();
     applied.add('set:$moveLineId=$quantity');
   }
 
@@ -68,7 +73,7 @@ class FakeScannerApi implements ScannerApi {
     required int productId,
     required double quantity,
   }) async {
-    _maybeThrow();
+    maybeThrow();
     applied.add('create:$pickingId/$productId=$quantity');
     return ++_createdId;
   }
@@ -78,28 +83,19 @@ class FakeScannerApi implements ScannerApi {
     required int pickingId,
     bool createBackorder = true,
   }) async {
-    _maybeThrow();
+    maybeThrow();
     applied.add('validate:$pickingId(backorder=$createBackorder)');
   }
 }
 
 /// In-memory fake CRM backend.
-class FakeCrmApi implements CrmApi {
+class FakeCrmApi with ThrowOnce implements CrmApi {
   final List<String> applied = [];
 
   List<RemoteLead> leads = [];
   List<RemoteCrmStage> stages = [];
 
-  Object? nextError;
   int _createdId = 5000;
-
-  void _maybeThrow() {
-    final error = nextError;
-    if (error != null) {
-      nextError = null;
-      throw error;
-    }
-  }
 
   @override
   Future<List<RemoteLead>> fetchMyOpenLeads() async => leads;
@@ -109,13 +105,13 @@ class FakeCrmApi implements CrmApi {
 
   @override
   Future<void> setLeadStage({required int leadId, required int stageId}) async {
-    _maybeThrow();
+    maybeThrow();
     applied.add('stage:$leadId->$stageId');
   }
 
   @override
   Future<void> logNote({required int leadId, required String body}) async {
-    _maybeThrow();
+    maybeThrow();
     applied.add('note:$leadId:$body');
   }
 
@@ -126,20 +122,18 @@ class FakeCrmApi implements CrmApi {
     String phone = '',
     String email = '',
   }) async {
-    _maybeThrow();
+    maybeThrow();
     applied.add('lead:$name');
     return ++_createdId;
   }
 }
 
 /// In-memory fake Sales backend.
-class FakeSalesApi implements SalesApi {
+class FakeSalesApi with ThrowOnce implements SalesApi {
   final List<String> applied = [];
 
   List<RemoteSaleOrder> orders = [];
   List<RemoteSaleOrderLine> lines = [];
-
-  Object? nextError;
 
   @override
   Future<List<RemoteSaleOrder>> fetchMyQuotations() async => orders;
@@ -150,11 +144,7 @@ class FakeSalesApi implements SalesApi {
 
   @override
   Future<void> confirmOrder({required int orderId}) async {
-    final error = nextError;
-    if (error != null) {
-      nextError = null;
-      throw error;
-    }
+    maybeThrow();
     applied.add('confirm:$orderId');
   }
 }

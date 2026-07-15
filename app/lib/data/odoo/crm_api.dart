@@ -47,10 +47,23 @@ class JsonRpcCrmApi implements CrmApi {
 
   @override
   Future<List<RemoteCrmStage>> fetchStages() async {
-    final rows = await _client.searchRead('crm.stage', [], [
-      'name',
-      'sequence',
-    ], order: 'sequence asc, id asc');
+    // Global stages plus the user's own teams' stages — mirrors what the
+    // Odoo pipeline shows instead of every team's private stages.
+    final uid = _client.uid ?? await _client.authenticate();
+    final rows = await _client.searchRead(
+      'crm.stage',
+      [
+        '|',
+        ['team_id', '=', false],
+        [
+          'team_id.member_ids',
+          'in',
+          [uid],
+        ],
+      ],
+      ['name', 'sequence'],
+      order: 'sequence asc, id asc',
+    );
     return rows.map(RemoteCrmStage.fromJson).toList();
   }
 

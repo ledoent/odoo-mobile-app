@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../odoo/crm_models.dart';
 import '../odoo/models.dart';
 import '../odoo/sales_models.dart';
+import '../sync/op.dart';
 
 part 'database.g.dart';
 
@@ -194,7 +195,10 @@ class AppDatabase extends _$AppDatabase {
   }) async {
     await batch((b) {
       b.deleteAll(pickings);
-      b.deleteAll(moveLines);
+      // Preserve optimistic local rows (negative ids): their create op may
+      // not have reached the server yet, and wiping them here would lose
+      // the operator's work.
+      b.deleteWhere(moveLines, (t) => t.id.isBiggerThanValue(0));
       b.insertAll(
         pickings,
         remotePickings.map(
@@ -239,7 +243,9 @@ class AppDatabase extends _$AppDatabase {
     required List<RemoteCrmStage> remoteStages,
   }) async {
     await batch((b) {
-      b.deleteAll(leads);
+      // Same negative-id preservation as move lines: unsynced quick-adds
+      // must survive a pull.
+      b.deleteWhere(leads, (t) => t.id.isBiggerThanValue(0));
       b.deleteAll(crmStages);
       b.insertAll(
         leads,
@@ -309,6 +315,19 @@ class AppDatabase extends _$AppDatabase {
         LeadsCompanion(stageId: Value(stageId), stageName: Value(stageName)),
       );
 
+  /// Next id for an optimistic local-only row: negative so it can never
+  /// collide with a server id. The row is deleted once its create op
+  /// succeeds (the pull then brings the real server row).
+  Future<int> _nextLocalId(
+    TableInfo<Table, dynamic> table,
+    GeneratedColumn<int> id,
+  ) async {
+    final minId = await (selectOnly(
+      table,
+    )..addColumns([id.min()])).map((row) => row.read(id.min())).getSingle();
+    return (minId != null && minId < 0 ? minId : 0) - 1;
+  }
+
   Future<int> insertLocalLead({
     required String name,
     required String partnerName,
@@ -317,11 +336,7 @@ class AppDatabase extends _$AppDatabase {
     int? stageId,
     String stageName = '',
   }) async {
-    // Same negative-id convention as move lines: local-only until next pull.
-    final minId = await (selectOnly(leads)..addColumns([leads.id.min()]))
-        .map((row) => row.read(leads.id.min()))
-        .getSingle();
-    final localId = (minId != null && minId < 0 ? minId : 0) - 1;
+    final localId = await _nextLocalId(leads, leads.id);
     await into(leads).insert(
       LeadsCompanion.insert(
         id: Value(localId),
@@ -349,19 +364,21 @@ class AppDatabase extends _$AppDatabase {
         ),
       );
 
+  Future<void> deleteLocalLead(int localId) => (delete(
+    leads,
+  )..where((t) => t.id.equals(localId) & t.id.isSmallerThanValue(0))).go();
+
+  Future<void> deleteLocalMoveLine(int localId) => (delete(
+    moveLines,
+  )..where((t) => t.id.equals(localId) & t.id.isSmallerThanValue(0))).go();
+
   Future<int> insertLocalMoveLine({
     required int pickingId,
     required int productId,
     required String productName,
     required double quantity,
   }) async {
-    // Local-only rows get negative ids so they can never collide with
-    // server ids; the next pull replaces them with the real rows.
-    final minId =
-        await (selectOnly(moveLines)..addColumns([moveLines.id.min()]))
-            .map((row) => row.read(moveLines.id.min()))
-            .getSingle();
-    final localId = (minId != null && minId < 0 ? minId : 0) - 1;
+    final localId = await _nextLocalId(moveLines, moveLines.id);
     await into(moveLines).insert(
       MoveLinesCompanion.insert(
         id: Value(localId),
@@ -381,6 +398,9 @@ class AppDatabase extends _$AppDatabase {
       );
 
   // ---- Op queue ----
+
+  Future<int> enqueue(SyncOp op) =>
+      enqueueOp(uuid: op.uuid, kind: op.kind, payload: op.encodePayload());
 
   Future<int> enqueueOp({
     required String uuid,

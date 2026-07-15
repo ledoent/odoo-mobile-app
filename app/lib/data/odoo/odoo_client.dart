@@ -70,11 +70,18 @@ class OdooClient {
     if (body['error'] != null) {
       final error = body['error'] as Map<String, dynamic>;
       final data = error['data'] as Map<String, dynamic>?;
-      throw OdooRpcException(
-        (data?['message'] ?? error['message'] ?? 'Unknown Odoo error')
-            .toString(),
-        data: data,
-      );
+      final message =
+          (data?['message'] ?? error['message'] ?? 'Unknown Odoo error')
+              .toString();
+      // A revoked/expired key on a cached uid comes back as a generic
+      // AccessDenied RPC error, not a login failure — classify it as an
+      // auth problem so the sync engine stops instead of mass-conflicting.
+      final errorName = (data?['name'] ?? '').toString();
+      if (errorName.endsWith('AccessDenied') ||
+          message.contains('Access Denied')) {
+        throw OdooAuthException(message, data: data);
+      }
+      throw OdooRpcException(message, data: data);
     }
     return body['result'];
   }

@@ -1,4 +1,4 @@
-import 'package:drift/drift.dart' hide isNull;
+import 'package:drift/drift.dart' hide isNull, isNotNull;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:odoo_scanner/data/local/database.dart';
@@ -32,7 +32,7 @@ void main() {
 
   tearDown(() => db.close());
 
-  Future<void> enqueue(ScanOp op) =>
+  Future<void> enqueue(SyncOp op) =>
       db.enqueueOp(uuid: op.uuid, kind: op.kind, payload: op.encodePayload());
 
   test('drains queued ops in order and marks them done', () async {
@@ -135,7 +135,7 @@ void main() {
       quantity: 1,
       localMoveLineId: -2,
     );
-    final decoded = ScanOp.decode(op.kind, op.encodePayload(), op.uuid);
+    final decoded = SyncOp.decode(op.kind, op.encodePayload(), op.uuid);
     expect(decoded, isA<AddProductLineOp>());
     expect((decoded as AddProductLineOp).localMoveLineId, -2);
     expect(decoded.uuid, op.uuid);
@@ -219,6 +219,80 @@ void main() {
     );
     expect(salesApi.applied, ['confirm:42']);
   });
+
+  test(
+    'auth failure during drain keeps ops pending, reports SyncAuthFailed',
+    () async {
+      await enqueue(SetQuantityOp(moveLineId: 11, quantity: 3));
+      await enqueue(SetQuantityOp(moveLineId: 12, quantity: 1));
+      api.nextError = FakeScannerApi.authFailure();
+
+      final result = await engine.sync();
+
+      // Not offline, not a conflict: the user must re-authenticate. Nothing
+      // was mass-marked conflict and nothing applied.
+      expect(result, isA<SyncAuthFailed>());
+      expect(api.applied, isEmpty);
+      expect(await db.pendingOps(), hasLength(2));
+    },
+  );
+
+  test(
+    'auth failure during pull reports SyncAuthFailed, not success',
+    () async {
+      final authEngine = SyncEngine(
+        db: db,
+        warehouseApi: api,
+        crmApi: _AuthFailingCrmApi(),
+        salesApi: salesApi,
+      );
+
+      expect(await authEngine.sync(), isA<SyncAuthFailed>());
+    },
+  );
+
+  test('pull preserves unsynced local rows (negative ids)', () async {
+    final localLead = await db.insertLocalLead(
+      name: 'Walk-in',
+      partnerName: '',
+      phone: '',
+      email: '',
+    );
+    final localLine = await db.insertLocalMoveLine(
+      pickingId: 1,
+      productId: 100,
+      productName: 'Widget',
+      quantity: 1,
+    );
+
+    await engine.sync(); // empty server: replaces mirrors
+
+    expect(await db.leadById(localLead), isNotNull);
+    expect(await db.moveLineById(localLine), isNotNull);
+  });
+
+  test('successful create reconciles away the optimistic local row', () async {
+    final localLead = await db.insertLocalLead(
+      name: 'Walk-in',
+      partnerName: '',
+      phone: '',
+      email: '',
+    );
+    await enqueue(CreateLeadOp(name: 'Walk-in', localLeadId: localLead));
+
+    final result = await engine.sync();
+
+    expect(result, isA<SyncSuccess>().having((r) => r.applied, 'applied', 1));
+    expect(crmApi.applied, ['lead:Walk-in']);
+    // The -1 row is gone; the server row arrives with the next pull.
+    expect(await db.leadById(localLead), isNull);
+  });
+}
+
+class _AuthFailingCrmApi extends FakeCrmApi {
+  @override
+  Future<List<RemoteLead>> fetchMyOpenLeads() async =>
+      throw FakeScannerApi.authFailure();
 }
 
 class _ThrowingCrmApi extends FakeCrmApi {

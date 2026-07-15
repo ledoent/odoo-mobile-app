@@ -125,4 +125,25 @@ void main() {
       ),
     );
   });
+
+  test('AccessDenied on a cached uid maps to OdooAuthException', () async {
+    adapter.handlers.add((_) => ok(7));
+    adapter.handlers.add(
+      (_) => {
+        'jsonrpc': '2.0',
+        'error': {
+          'message': 'Odoo Server Error',
+          'data': {
+            'name': 'odoo.exceptions.AccessDenied',
+            'message': 'Access Denied',
+          },
+        },
+      },
+    );
+
+    expect(
+      client.executeKw('stock.move.line', 'write', []),
+      throwsA(isA<OdooAuthException>()),
+    );
+  });
 }

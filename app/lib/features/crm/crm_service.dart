@@ -15,20 +15,12 @@ class CrmService {
   }) async {
     final op = SetLeadStageOp(leadId: leadId, stageId: stageId);
     await _db.setLocalLeadStage(leadId, stageId, stageName);
-    await _db.enqueueOp(
-      uuid: op.uuid,
-      kind: op.kind,
-      payload: op.encodePayload(),
-    );
+    await _db.enqueue(op);
   }
 
   Future<void> logNote({required int leadId, required String body}) async {
     final op = LogLeadNoteOp(leadId: leadId, body: body);
-    await _db.enqueueOp(
-      uuid: op.uuid,
-      kind: op.kind,
-      payload: op.encodePayload(),
-    );
+    await _db.enqueue(op);
   }
 
   Future<int> createLead({
@@ -50,11 +42,7 @@ class CrmService {
       email: email,
       localLeadId: localId,
     );
-    await _db.enqueueOp(
-      uuid: op.uuid,
-      kind: op.kind,
-      payload: op.encodePayload(),
-    );
+    await _db.enqueue(op);
     return localId;
   }
 }

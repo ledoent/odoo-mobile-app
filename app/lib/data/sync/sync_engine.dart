@@ -24,13 +24,21 @@ class SyncOffline extends SyncResult {
   const SyncOffline();
 }
 
+/// Credentials were rejected (revoked/expired API key). Ops stay pending;
+/// the user needs to re-authenticate, not retry.
+class SyncAuthFailed extends SyncResult {
+  const SyncAuthFailed();
+}
+
 /// Drains the outbound op queue in order, then refreshes the local mirrors
 /// of every enabled module (warehouse, CRM, sales).
 ///
 /// Failure policy (§6 of the plan):
 /// - transport errors (no network, timeouts) stop the drain — ops stay
 ///   `pending` and are retried on the next connectivity event;
-/// - server rejections mark the op `conflict` and keep draining — the
+/// - auth errors stop everything and are reported as [SyncAuthFailed] —
+///   ops stay pending; retrying can't help until the user re-authenticates;
+/// - other server rejections mark the op `conflict` and keep draining — the
 ///   subsequent pull reloads the affected records so the operator re-checks
 ///   against fresh state instead of the app blindly overwriting.
 class SyncEngine {
@@ -55,17 +63,22 @@ class SyncEngine {
     _running = true;
     try {
       final drainResult = await _drainQueue();
-      if (drainResult is SyncOffline) return drainResult;
+      if (drainResult is! SyncSuccess) return drainResult;
       // A module the server doesn't have installed (e.g. no CRM) fails its
-      // own pull with an RPC error; the other mirrors still refresh.
+      // own pull with an RPC error; the other mirrors still refresh. Auth
+      // failures are different: they abort the whole sync visibly.
       for (final pull in [_pullWarehouse, _pullCrm, _pullSales]) {
         try {
           await pull();
+        } on OdooAuthException {
+          rethrow;
         } on OdooRpcException {
           continue;
         }
       }
       return drainResult;
+    } on OdooAuthException {
+      return const SyncAuthFailed();
     } on DioException {
       return const SyncOffline();
     } finally {
@@ -77,16 +90,16 @@ class SyncEngine {
     var applied = 0;
     var conflicts = 0;
     for (final row in await db.pendingOps()) {
-      final op = ScanOp.decode(row.kind, row.payload, row.uuid);
+      final op = SyncOp.decode(row.kind, row.payload, row.uuid);
       try {
         await _apply(op);
         await db.markOpDone(row.id);
         applied++;
       } on OdooAuthException catch (e) {
         // Bad/expired credentials are a session problem, not an op problem:
-        // keep everything pending and stop, like a transport failure.
+        // keep everything pending and surface the real cause.
         await db.bumpOpAttempt(row.id, e.message);
-        return const SyncOffline();
+        return const SyncAuthFailed();
       } on OdooRpcException catch (e) {
         // The server refused the op (record changed/deleted underneath us).
         // Surface it instead of overwriting: mark conflict, keep draining.
@@ -101,42 +114,54 @@ class SyncEngine {
     return SyncSuccess(applied: applied, conflicts: conflicts);
   }
 
-  Future<void> _apply(ScanOp op) => switch (op) {
-    SetQuantityOp(:final moveLineId, :final quantity) =>
-      warehouseApi.setMoveLineQuantity(
-        moveLineId: moveLineId,
-        quantity: quantity,
-      ),
-    AddProductLineOp(:final pickingId, :final productId, :final quantity) =>
-      warehouseApi.createMoveLine(
-        pickingId: pickingId,
-        productId: productId,
-        quantity: quantity,
-      ),
-    ValidatePickingOp(:final pickingId, :final createBackorder) =>
-      warehouseApi.validatePicking(
-        pickingId: pickingId,
-        createBackorder: createBackorder,
-      ),
-    SetLeadStageOp(:final leadId, :final stageId) => crmApi.setLeadStage(
-      leadId: leadId,
-      stageId: stageId,
-    ),
-    LogLeadNoteOp(:final leadId, :final body) => crmApi.logNote(
-      leadId: leadId,
-      body: body,
-    ),
-    CreateLeadOp(:final name, :final contactName, :final phone, :final email) =>
-      crmApi.createLead(
-        name: name,
-        contactName: contactName,
-        phone: phone,
-        email: email,
-      ),
-    ConfirmSaleOrderOp(:final orderId) => salesApi.confirmOrder(
-      orderId: orderId,
-    ),
-  };
+  Future<void> _apply(SyncOp op) async {
+    switch (op) {
+      case SetQuantityOp(:final moveLineId, :final quantity):
+        await warehouseApi.setMoveLineQuantity(
+          moveLineId: moveLineId,
+          quantity: quantity,
+        );
+      case AddProductLineOp(
+        :final pickingId,
+        :final productId,
+        :final quantity,
+        :final localMoveLineId,
+      ):
+        await warehouseApi.createMoveLine(
+          pickingId: pickingId,
+          productId: productId,
+          quantity: quantity,
+        );
+        // The server row arrives with the next pull; drop the optimistic
+        // local twin so it can't linger alongside it.
+        await db.deleteLocalMoveLine(localMoveLineId);
+      case ValidatePickingOp(:final pickingId, :final createBackorder):
+        await warehouseApi.validatePicking(
+          pickingId: pickingId,
+          createBackorder: createBackorder,
+        );
+      case SetLeadStageOp(:final leadId, :final stageId):
+        await crmApi.setLeadStage(leadId: leadId, stageId: stageId);
+      case LogLeadNoteOp(:final leadId, :final body):
+        await crmApi.logNote(leadId: leadId, body: body);
+      case CreateLeadOp(
+        :final name,
+        :final contactName,
+        :final phone,
+        :final email,
+        :final localLeadId,
+      ):
+        await crmApi.createLead(
+          name: name,
+          contactName: contactName,
+          phone: phone,
+          email: email,
+        );
+        await db.deleteLocalLead(localLeadId);
+      case ConfirmSaleOrderOp(:final orderId):
+        await salesApi.confirmOrder(orderId: orderId);
+    }
+  }
 
   Future<void> _pullWarehouse() async {
     final pickings = await warehouseApi.fetchOpenPickings(

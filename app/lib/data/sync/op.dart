@@ -7,8 +7,8 @@ const _uuid = Uuid();
 /// Typed outbound operations. Each op carries a client-generated UUID so a
 /// retry after a dropped response can never double-apply (the server module
 /// dedupes on it; the JSON-RPC path relies on absolute-set semantics).
-sealed class ScanOp {
-  ScanOp({String? uuid}) : uuid = uuid ?? _uuid.v4();
+sealed class SyncOp {
+  SyncOp({String? uuid}) : uuid = uuid ?? _uuid.v4();
 
   final String uuid;
 
@@ -16,7 +16,7 @@ sealed class ScanOp {
   Map<String, dynamic> toPayload();
   String encodePayload() => jsonEncode(toPayload());
 
-  static ScanOp decode(String kind, String payload, String uuid) {
+  static SyncOp decode(String kind, String payload, String uuid) {
     final map = jsonDecode(payload) as Map<String, dynamic>;
     return switch (kind) {
       SetQuantityOp.opKind => SetQuantityOp(
@@ -63,7 +63,7 @@ sealed class ScanOp {
   }
 }
 
-class SetQuantityOp extends ScanOp {
+class SetQuantityOp extends SyncOp {
   SetQuantityOp({required this.moveLineId, required this.quantity, super.uuid});
 
   static const opKind = 'set_quantity';
@@ -81,7 +81,7 @@ class SetQuantityOp extends ScanOp {
   };
 }
 
-class AddProductLineOp extends ScanOp {
+class AddProductLineOp extends SyncOp {
   AddProductLineOp({
     required this.pickingId,
     required this.productId,
@@ -111,7 +111,7 @@ class AddProductLineOp extends ScanOp {
   };
 }
 
-class ValidatePickingOp extends ScanOp {
+class ValidatePickingOp extends SyncOp {
   ValidatePickingOp({
     required this.pickingId,
     this.createBackorder = true,
@@ -135,7 +135,7 @@ class ValidatePickingOp extends ScanOp {
 
 // ---- CRM ops ----
 
-class SetLeadStageOp extends ScanOp {
+class SetLeadStageOp extends SyncOp {
   SetLeadStageOp({required this.leadId, required this.stageId, super.uuid});
 
   static const opKind = 'set_lead_stage';
@@ -150,7 +150,7 @@ class SetLeadStageOp extends ScanOp {
   Map<String, dynamic> toPayload() => {'leadId': leadId, 'stageId': stageId};
 }
 
-class LogLeadNoteOp extends ScanOp {
+class LogLeadNoteOp extends SyncOp {
   LogLeadNoteOp({required this.leadId, required this.body, super.uuid});
 
   static const opKind = 'log_lead_note';
@@ -165,7 +165,7 @@ class LogLeadNoteOp extends ScanOp {
   Map<String, dynamic> toPayload() => {'leadId': leadId, 'body': body};
 }
 
-class CreateLeadOp extends ScanOp {
+class CreateLeadOp extends SyncOp {
   CreateLeadOp({
     required this.name,
     this.contactName = '',
@@ -200,7 +200,7 @@ class CreateLeadOp extends ScanOp {
 
 // ---- Sales ops ----
 
-class ConfirmSaleOrderOp extends ScanOp {
+class ConfirmSaleOrderOp extends SyncOp {
   ConfirmSaleOrderOp({required this.orderId, super.uuid});
 
   static const opKind = 'confirm_sale_order';
