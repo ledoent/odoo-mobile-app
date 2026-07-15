@@ -405,6 +405,24 @@ class AppDatabase extends _$AppDatabase {
         .watchSingle();
   }
 
+  Stream<List<OpQueueData>> watchConflictOps() =>
+      (select(opQueue)
+            ..where((t) => t.status.equals(OpStatus.conflict.name))
+            ..orderBy([(t) => OrderingTerm.asc(t.id)]))
+          .watch();
+
+  /// Puts a conflicted op back in line for the next drain.
+  Future<void> retryOp(int opId) =>
+      (update(opQueue)..where((t) => t.id.equals(opId))).write(
+        const OpQueueCompanion(status: Value(OpStatus.pending)),
+      );
+
+  /// Drops a conflicted op the operator has decided not to replay.
+  Future<void> discardOp(int opId) =>
+      (update(opQueue)..where((t) => t.id.equals(opId))).write(
+        const OpQueueCompanion(status: Value(OpStatus.done)),
+      );
+
   Future<void> markOpDone(int opId) =>
       (update(opQueue)..where((t) => t.id.equals(opId))).write(
         const OpQueueCompanion(status: Value(OpStatus.done)),

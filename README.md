@@ -16,8 +16,8 @@ idempotent op queue, so all roles work with no signal and sync when it
 returns. A thin, OCA-candidate REST module gives the warehouse flows a
 stable, versioned server contract.
 
-See [PLAN.md](PLAN.md) for the full architecture and roadmap (§11 covers the
-multi-role layout).
+See [PLAN.md](PLAN.md) for the architecture and [ROADMAP.md](ROADMAP.md) for
+the feature plan, per-module status, and server-customization behavior.
 
 ## Monorepo layout
 

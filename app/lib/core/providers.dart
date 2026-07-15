@@ -83,6 +83,10 @@ final pendingOpCountProvider = StreamProvider<int>(
   (ref) => ref.watch(databaseProvider).watchPendingOpCount(),
 );
 
+final conflictOpsProvider = StreamProvider<List<OpQueueData>>(
+  (ref) => ref.watch(databaseProvider).watchConflictOps(),
+);
+
 /// Kicks a sync whenever connectivity comes back (§6: connectivity drives
 /// the sync trigger). Kept alive for the app's lifetime from main().
 final connectivitySyncProvider = Provider<void>((ref) {

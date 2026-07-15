@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../core/providers.dart';
 import '../../core/router.dart';
 import '../../data/sync/sync_engine.dart';
+import 'sync_issues_sheet.dart';
 
 /// Role-based entry point: one tile per module. Everything renders from the
 /// local mirror, so every module works offline once synced.
@@ -15,6 +16,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pendingOps = ref.watch(pendingOpCountProvider).value ?? 0;
+    final conflicts = ref.watch(conflictOpsProvider).value ?? [];
 
     Future<void> refresh() async {
       final engine = ref.read(syncEngineProvider);
@@ -59,6 +61,16 @@ class HomeScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Odoo Mobile'),
         actions: [
+          if (conflicts.isNotEmpty)
+            IconButton(
+              tooltip: 'Sync issues',
+              onPressed: () => showSyncIssuesSheet(context),
+              icon: Badge(
+                label: Text('${conflicts.length}'),
+                backgroundColor: Theme.of(context).colorScheme.error,
+                child: const Icon(Icons.sync_problem),
+              ),
+            ),
           if (pendingOps > 0)
             Padding(
               padding: const EdgeInsets.only(right: 8),

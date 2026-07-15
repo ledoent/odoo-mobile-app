@@ -82,6 +82,11 @@ class SyncEngine {
         await _apply(op);
         await db.markOpDone(row.id);
         applied++;
+      } on OdooAuthException catch (e) {
+        // Bad/expired credentials are a session problem, not an op problem:
+        // keep everything pending and stop, like a transport failure.
+        await db.bumpOpAttempt(row.id, e.message);
+        return const SyncOffline();
       } on OdooRpcException catch (e) {
         // The server refused the op (record changed/deleted underneath us).
         // Surface it instead of overwriting: mark conflict, keep draining.

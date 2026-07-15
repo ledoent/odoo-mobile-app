@@ -7,8 +7,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../core/providers.dart';
 import '../../data/local/database.dart';
 
-final _leadProvider = FutureProvider.family<Lead?, int>(
-  (ref, id) => ref.watch(databaseProvider).leadById(id),
+final _leadProvider = StreamProvider.family<Lead?, int>(
+  (ref, id) => ref
+      .watch(databaseProvider)
+      .watchLeads()
+      .map((rows) => rows.where((l) => l.id == id).firstOrNull),
 );
 
 final _stagesProvider = StreamProvider<List<CrmStage>>(
@@ -67,11 +70,14 @@ class LeadDetailScreen extends ConsumerWidget {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
+    // Quick-added locally, not on the server yet: read-only until the op
+    // syncs (stage moves and notes need a real server id).
+    final pendingSync = leadId < 0;
+
     Future<void> moveTo(CrmStage stage) async {
       await ref
           .read(crmServiceProvider)
           .setStage(leadId: leadId, stageId: stage.id, stageName: stage.name);
-      ref.invalidate(_leadProvider(leadId));
       unawaited(ref.read(syncEngineProvider)?.sync());
     }
 
@@ -80,6 +86,25 @@ class LeadDetailScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (pendingSync)
+            Card(
+              color: Theme.of(context).colorScheme.tertiaryContainer,
+              child: const Padding(
+                padding: EdgeInsets.all(12),
+                child: Row(
+                  children: [
+                    Icon(Icons.cloud_upload_outlined),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Waiting to sync — stage moves and notes unlock '
+                        'once this lead reaches the server.',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           if (lead.partnerName.isNotEmpty)
             ListTile(
               leading: const Icon(Icons.business_outlined),
@@ -111,13 +136,13 @@ class LeadDetailScreen extends ConsumerWidget {
                 ChoiceChip(
                   label: Text(stage.name),
                   selected: stage.id == lead.stageId,
-                  onSelected: (_) => moveTo(stage),
+                  onSelected: pendingSync ? null : (_) => moveTo(stage),
                 ),
             ],
           ),
           const SizedBox(height: 24),
           FilledButton.icon(
-            onPressed: () => _logNote(context, ref),
+            onPressed: pendingSync ? null : () => _logNote(context, ref),
             icon: const Icon(Icons.edit_note),
             label: const Text('Log a note'),
           ),

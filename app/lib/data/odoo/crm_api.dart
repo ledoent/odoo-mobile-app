@@ -81,7 +81,10 @@ class JsonRpcCrmApi implements CrmApi {
     String phone = '',
     String email = '',
   }) async {
-    final values = <String, dynamic>{'name': name};
+    // Assign explicitly: server-side team rules may otherwise leave the
+    // lead unowned, dropping it out of this user's "my pipeline" pull.
+    final uid = _client.uid ?? await _client.authenticate();
+    final values = <String, dynamic>{'name': name, 'user_id': uid};
     if (contactName.isNotEmpty) values['contact_name'] = contactName;
     if (phone.isNotEmpty) values['phone'] = phone;
     if (email.isNotEmpty) values['email_from'] = email;

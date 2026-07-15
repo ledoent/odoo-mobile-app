@@ -91,15 +91,14 @@ class CrmPipelineScreen extends ConsumerWidget {
               ),
             );
           }
-          // Group by stage, preserving the stage-ordered query.
+          // Group by stage, preserving the stage-ordered query. Local
+          // quick-adds (negative id) haven't reached the server yet.
           final sections = <String, List<Lead>>{};
           for (final lead in rows) {
-            sections
-                .putIfAbsent(
-                  lead.stageName.isEmpty ? 'No stage' : lead.stageName,
-                  () => [],
-                )
-                .add(lead);
+            final section = lead.id < 0
+                ? 'Pending sync'
+                : (lead.stageName.isEmpty ? 'No stage' : lead.stageName);
+            sections.putIfAbsent(section, () => []).add(lead);
           }
           return ListView(
             children: [
@@ -115,14 +114,15 @@ class CrmPipelineScreen extends ConsumerWidget {
                   ListTile(
                     title: Text(lead.name),
                     subtitle: Text(lead.partnerName),
+                    leading: lead.id < 0
+                        ? const Icon(Icons.cloud_upload_outlined)
+                        : null,
                     trailing: lead.expectedRevenue > 0
                         ? Text(lead.expectedRevenue.toStringAsFixed(0))
                         : null,
-                    onTap: lead.id > 0
-                        ? () => AutoRouter.of(
-                            context,
-                          ).push(LeadDetailRoute(leadId: lead.id))
-                        : null,
+                    onTap: () => AutoRouter.of(
+                      context,
+                    ).push(LeadDetailRoute(leadId: lead.id)),
                   ),
               ],
             ],
