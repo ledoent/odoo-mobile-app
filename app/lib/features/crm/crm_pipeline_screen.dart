@@ -51,9 +51,16 @@ class CrmPipelineScreen extends ConsumerWidget {
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Cancel'),
           ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Create'),
+          // Create stays disabled until the required name is filled, so a
+          // mis-tap can never silently discard what was typed.
+          ValueListenableBuilder(
+            valueListenable: name,
+            builder: (context, value, _) => FilledButton(
+              onPressed: value.text.trim().isEmpty
+                  ? null
+                  : () => Navigator.pop(context, true),
+              child: const Text('Create'),
+            ),
           ),
         ],
       ),

@@ -7,10 +7,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart' hide Provider;
 import 'package:odoo_scanner/core/providers.dart';
 import 'package:odoo_scanner/core/router.dart';
 import 'package:odoo_scanner/data/local/database.dart';
-import 'package:odoo_scanner/data/odoo/crm_models.dart';
-import 'package:odoo_scanner/data/odoo/models.dart';
-import 'package:odoo_scanner/data/odoo/sales_models.dart';
 import 'package:odoo_scanner/data/sync/op.dart';
+
+import '../seeds.dart';
 
 /// UX verification: these tests pump the real screens over a real (in-memory)
 /// database and walk the flows an operator performs, asserting what is
@@ -54,32 +53,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 300));
   }
 
-  Future<void> seedCrm() => db.replaceCrmWorkingSet(
-    remoteLeads: [
-      const RemoteLead(
-        id: 1,
-        name: 'Big deal',
-        partnerName: 'Acme',
-        stageId: 2,
-        stageName: 'New',
-        expectedRevenue: 1200,
-      ),
-      const RemoteLead(
-        id: 2,
-        name: 'Bigger deal',
-        stageId: 3,
-        stageName: 'Qualified',
-      ),
-    ],
-    remoteStages: [
-      const RemoteCrmStage(id: 2, name: 'New', sequence: 0),
-      const RemoteCrmStage(id: 3, name: 'Qualified', sequence: 1),
-    ],
-  );
-
   group('CRM pipeline', () {
     testWidgets('groups leads under their stage headers', (tester) async {
-      await seedCrm();
+      await seedCrm(db);
       await pumpApp(tester, const CrmPipelineRoute());
 
       expect(find.text('New (1)'), findsOneWidget);
@@ -92,7 +68,7 @@ void main() {
     testWidgets('server lead opens detail with its stage selected', (
       tester,
     ) async {
-      await seedCrm();
+      await seedCrm(db);
       await pumpApp(tester, const CrmPipelineRoute());
 
       await tester.tap(find.text('Bigger deal'));
@@ -111,7 +87,7 @@ void main() {
     testWidgets('quick-add shows a tappable pending lead, actions locked', (
       tester,
     ) async {
-      await seedCrm();
+      await seedCrm(db);
       await pumpApp(tester, const CrmPipelineRoute());
 
       await tester.tap(find.byType(FloatingActionButton));
@@ -120,6 +96,7 @@ void main() {
         find.widgetWithText(TextField, 'Opportunity *'),
         'Walk-in prospect',
       );
+      await tester.pump(); // let the Create button enable
       await tester.tap(find.text('Create'));
       await tester.pumpAndSettle();
 
@@ -143,6 +120,48 @@ void main() {
 
       await endPump(tester);
     });
+  });
+
+  testWidgets('quick-add Create is disabled until a name is entered', (
+    tester,
+  ) async {
+    await seedCrm(db);
+    await pumpApp(tester, const CrmPipelineRoute());
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    final createButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Create'),
+    );
+    expect(createButton.onPressed, isNull, reason: 'no silent discard');
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Opportunity *'),
+      'Named lead',
+    );
+    await tester.pumpAndSettle();
+    final enabled = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, 'Create'),
+    );
+    expect(enabled.onPressed, isNotNull);
+
+    await endPump(tester);
+  });
+
+  testWidgets('detail of a record gone from the mirror explains itself', (
+    tester,
+  ) async {
+    await seedCrm(db);
+    await pumpApp(tester, LeadDetailRoute(leadId: 424242));
+
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(
+      find.textContaining('no longer in your open pipeline'),
+      findsOneWidget,
+    );
+
+    await endPump(tester);
   });
 
   group('Sync issues surface', () {
@@ -200,29 +219,8 @@ void main() {
   });
 
   group('Sales', () {
-    Future<void> seedSales() => db.replaceSalesWorkingSet(
-      remoteOrders: [
-        const RemoteSaleOrder(
-          id: 9,
-          name: 'S00009',
-          state: 'sent',
-          partnerName: 'Acme',
-          amountTotal: 100,
-        ),
-      ],
-      remoteLines: [
-        const RemoteSaleOrderLine(
-          id: 90,
-          orderId: 9,
-          description: 'Widget',
-          quantity: 2,
-          priceSubtotal: 50,
-        ),
-      ],
-    );
-
     testWidgets('quotation opens and confirm queues the op', (tester) async {
-      await seedSales();
+      await seedSales(db);
       await pumpApp(tester, const QuotationsRoute());
 
       await tester.tap(find.text('S00009'));
@@ -252,34 +250,10 @@ void main() {
   });
 
   group('Warehouse scan entry', () {
-    Future<void> seedWarehouse() => db.replaceWorkingSet(
-      remotePickings: [
-        const RemotePicking(
-          id: 1,
-          name: 'WH/IN/00001',
-          state: 'assigned',
-          pickingTypeCode: 'incoming',
-        ),
-      ],
-      remoteMoveLines: [
-        const RemoteMoveLine(
-          id: 10,
-          pickingId: 1,
-          productId: 100,
-          productName: 'Widget',
-          quantity: 0,
-          picked: false,
-        ),
-      ],
-      remoteProducts: [
-        const RemoteProduct(id: 100, name: 'Widget', barcode: '111'),
-      ],
-    );
-
     testWidgets('typed barcode increments the line (keyboard wedge path)', (
       tester,
     ) async {
-      await seedWarehouse();
+      await seedWarehouse(db);
       await pumpApp(tester, PickingDetailRoute(pickingId: 1));
 
       await tester.enterText(find.byType(TextField), '111');
@@ -293,7 +267,7 @@ void main() {
     });
 
     testWidgets('unknown barcode is surfaced, nothing queued', (tester) async {
-      await seedWarehouse();
+      await seedWarehouse(db);
       await pumpApp(tester, PickingDetailRoute(pickingId: 1));
 
       await tester.enterText(find.byType(TextField), '999');

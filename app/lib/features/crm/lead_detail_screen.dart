@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/sync_feedback.dart';
 import '../../data/local/database.dart';
 
 final _leadProvider = StreamProvider.family<Lead?, int>(
@@ -63,11 +64,21 @@ class LeadDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final lead = ref.watch(_leadProvider(leadId)).value;
+    final leadAsync = ref.watch(_leadProvider(leadId));
     final stages = ref.watch(_stagesProvider).value ?? [];
 
-    if (lead == null) {
+    if (leadAsync.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final lead = leadAsync.value;
+    if (lead == null) {
+      // A pending quick-add's -1 row is replaced by the server row after its
+      // create op syncs; won/reassigned leads also leave the working set.
+      return const RecordGoneScaffold(
+        message:
+            'This lead is no longer in your open pipeline — it synced, was '
+            'won, or was reassigned. Check the pipeline list for it.',
+      );
     }
 
     // Quick-added locally, not on the server yet: read-only until the op

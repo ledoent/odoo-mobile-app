@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/sync_feedback.dart';
 import '../../data/local/database.dart';
 
 final _orderProvider = StreamProvider.family<SaleOrder?, int>(
@@ -27,11 +28,20 @@ class QuotationDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final order = ref.watch(_orderProvider(orderId)).value;
+    final orderAsync = ref.watch(_orderProvider(orderId));
     final lines = ref.watch(_linesProvider(orderId)).value ?? [];
 
-    if (order == null) {
+    if (orderAsync.isLoading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    final order = orderAsync.value;
+    if (order == null) {
+      // Confirmed orders leave the draft/sent working set on the next pull.
+      return const RecordGoneScaffold(
+        message:
+            'This quotation left your open list — it was confirmed or '
+            'reassigned. Pull to refresh on the list for current data.',
+      );
     }
 
     Future<void> confirm() async {

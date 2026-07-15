@@ -78,8 +78,12 @@ class _SyncIssuesList extends ConsumerWidget {
                           IconButton(
                             tooltip: 'Discard',
                             icon: const Icon(Icons.delete_outline),
-                            onPressed: () =>
-                                ref.read(databaseProvider).discardOp(op.id),
+                            onPressed: () async {
+                              await ref.read(databaseProvider).discardOp(op.id);
+                              // Re-pull so optimistic mirror changes from
+                              // the dropped op revert to server truth.
+                              unawaited(ref.read(syncEngineProvider)?.sync());
+                            },
                           ),
                         ],
                       ),
